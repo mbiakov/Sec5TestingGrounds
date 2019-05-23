@@ -1,15 +1,19 @@
 // MBI Copyrights
 
 #include "ChooseNextWaypoint.h"
+#include "PatrolRoute.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
-#include "PatrollingGuard.h"
 
 EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory) {
-	// TODO Protect against empty Patrol Route
-
 	/// Get the Patrol Points from the controlled PatrollingGuard
-	TArray<AActor*> PatrolPoints = Cast<APatrollingGuard>(OwnerComp.GetAIOwner()->GetPawn())->PatrolPoints;
+	UPatrolRoute* PatrolRoute = OwnerComp.GetAIOwner()->GetPawn()->FindComponentByClass<UPatrolRoute>();
+	if (!ensure(PatrolRoute)) return EBTNodeResult::Failed;
+	TArray<AActor*> PatrolPoints = PatrolRoute->GetPatrolPoints();
+	if (PatrolPoints.Num() == 0) {
+		UE_LOG(LogTemp, Warning, TEXT("A guard is missing Patrol Points"));
+		return EBTNodeResult::Failed;
+	}
 
 	/// Set Next Waypoint
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
