@@ -2,7 +2,7 @@
 
 #include "Sec5TestingGroundsGameMode.h"
 #include "Sec5TestingGroundsHUD.h"
-#include "Sec5TestingGroundsCharacter.h"
+#include "01_Player/FirstPersonCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 ASec5TestingGroundsGameMode::ASec5TestingGroundsGameMode()
