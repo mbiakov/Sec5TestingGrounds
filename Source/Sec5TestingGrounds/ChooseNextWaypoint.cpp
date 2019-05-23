@@ -6,7 +6,7 @@
 #include "AIController.h"
 
 EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory) {
-	/// Get the Patrol Points from the controlled PatrollingGuard
+	/// Get the Patrol Points from the component UPatrolRoute that must be attached to the Pawn
 	UPatrolRoute* PatrolRoute = OwnerComp.GetAIOwner()->GetPawn()->FindComponentByClass<UPatrolRoute>();
 	if (!ensure(PatrolRoute)) return EBTNodeResult::Failed;
 	TArray<AActor*> PatrolPoints = PatrolRoute->GetPatrolPoints();
