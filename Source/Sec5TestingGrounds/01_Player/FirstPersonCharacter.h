@@ -52,8 +52,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Gun Configuration")
+	TSubclassOf<class AGun> GunBlueprint;
+
 	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Configuration")
 	class UAnimMontage* FireAnimation;
 
 	/** Whether to use motion controller location for aiming. */
@@ -61,6 +64,9 @@ public:
 	uint32 bUsingMotionControllers : 1;
 
 protected:
+
+	/** Fires a projectile. */
+	void OnFire();
 
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();
@@ -115,5 +121,6 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+private:
+	class AGun* Gun;
 };
-

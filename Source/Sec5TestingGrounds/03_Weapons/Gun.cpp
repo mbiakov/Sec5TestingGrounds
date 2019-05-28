@@ -13,37 +13,25 @@ AGun::AGun()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// TODO Rename to Gun
-	// Create a gun mesh component
-	FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
-	FP_Gun->bCastDynamicShadow = false;
-	FP_Gun->CastShadow = false;
-	FP_Gun->SetupAttachment(RootComponent);
+	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
+	Gun->bCastDynamicShadow = false;
+	Gun->CastShadow = false;
+	SetRootComponent(Gun);
 
-	// TODO Rename to Muzzle
-	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
-	FP_MuzzleLocation->SetupAttachment(FP_Gun);
-	FP_MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
-}
-
-void AGun::BeginPlay()
-{
-	Super::BeginPlay();
+	Muzzle = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle"));
+	Muzzle->SetupAttachment(Gun);
+	Muzzle->SetRelativeLocation(FVector(0.f, 59.f, 11.f));
 }
 
 void AGun::OnFire()
 {
-	// try and fire a projectile
 	if (ProjectileClass != NULL)
 	{
 		UWorld* const World = GetWorld();
 		if (World != NULL)
 		{
-			// TODO Verify this works once the Gun is attached
-			// Course version: const FRotator SpawnRotation = FP_MuzzleLocation->GetComponentRotation();
 			const FRotator SpawnRotation = Cast<APawn>(GetAttachParentActor())->GetControlRotation();
-
-			const FVector SpawnLocation = FP_MuzzleLocation->GetComponentLocation();
+			const FVector SpawnLocation = Muzzle->GetComponentLocation();
 
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
@@ -54,25 +42,22 @@ void AGun::OnFire()
 		}
 	}
 
-	// try and play the sound if specified
 	if (FireSound != NULL)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation(), 0.2f);
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
+	// TODO See if it's better to do it like it's done in the course: FireAnimation and PawnAnimMesh are Gun UPROPERTY EditDefaultsOnly. See how it is adapted to PatrollingGuard
+	// IDEA Create a new component GunCarrier that must be added to all the Pawns that can carry a Gun. This component will handle these 2 properties.
+	//      Gun specification: To have the Pawn able to carry the Gun, it must have GunCarrier component attached and configured.
+	//      Then use GetAttachParentActor()->FindComponentByClass<GunCarrier>() to get all the properties.
 	// try and play a firing animation if specified
-	// TODO Verify this works once attached
-	// TOOD Make it more general than just FirstPersonCharacter
-	// In the course it as a Edit Uprop
 	UAnimMontage* FireAnimation = Cast<AFirstPersonCharacter>(GetAttachParentActor())->FireAnimation;
 	if (FireAnimation != NULL)
 	{
-		// Get the animation object for the arms mesh
-		// TODO Verify this woks once attached to the Pawn
-		// TODO Delete the commented code
-		// Initial version: UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
-		// In the course it's an edit uproperty
-		UAnimInstance* AnimInstance = GetAttachParentActor()->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance();
+		// Get the animation object
+		USkeletalMeshComponent* PawnAnimMesh = Cast<USkeletalMeshComponent>(GetAttachParentActor()->GetComponentsByTag(USkeletalMeshComponent::StaticClass(), FName("PawnAnimatedMesh"))[0]);
+		UAnimInstance* AnimInstance = PawnAnimMesh->GetAnimInstance();
 		if (AnimInstance != NULL)
 		{
 			AnimInstance->Montage_Play(FireAnimation, 1.f);

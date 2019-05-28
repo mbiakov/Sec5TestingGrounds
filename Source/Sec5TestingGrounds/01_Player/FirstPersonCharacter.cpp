@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "03_Weapons/Gun.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -40,7 +41,7 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	Mesh1P->RelativeRotation = FRotator(1.9f, -19.19f, 5.2f);
 	Mesh1P->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 
-	// Note: The ProjectileClass and the skeletal mesh/anim blueprints for Mesh1P, FP_Gun, and VR_Gun 
+	// Note: The ProjectileClass and the skeletal mesh/anim blueprints for Mesh1P, Gun, and VR_Gun 
 	// are set in the derived blueprint asset named MyCharacter to avoid direct content references in C++.
 
 	// Create VR Controllers.
@@ -73,9 +74,10 @@ void AFirstPersonCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	// TODO Transforme the Gun attachment to use the new Gun Actor
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	// FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	if (!ensure(GunBlueprint)) return;
+	Gun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
+	Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
@@ -102,9 +104,8 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	// TODO Bind to the Gun OnFire function
 	// Bind fire event
-	// PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFirstPersonCharacter::OnFire);
 
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
@@ -124,6 +125,11 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFirstPersonCharacter::LookUpAtRate);
 }
 
+void AFirstPersonCharacter::OnFire()
+{
+	if (Gun) Gun->OnFire();
+}
+
 void AFirstPersonCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -137,8 +143,7 @@ void AFirstPersonCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, cons
 	}
 	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
 	{
-		// TODO Call the Gun OnFire() function
-		// OnFire();
+		OnFire();
 	}
 	TouchItem.bIsPressed = true;
 	TouchItem.FingerIndex = FingerIndex;
