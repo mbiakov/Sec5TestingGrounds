@@ -7,9 +7,7 @@
 #include "Gun.generated.h"
 
 /**
-* Requirements:
-*   - The Pawn on witch the Gun is attached must have the tag "PawnAnimatedMesh" on its animated Skeletal Mesh Component. Needed to create firing animation. See OnFire() method.
-*	- The Pawn on witch the Gun is attached must have UAnimMontage* FireAnimation property. Needed to create firing animation. See OnFire() method.
+* 
 */
 UCLASS()
 class SEC5TESTINGGROUNDS_API AGun : public AActor

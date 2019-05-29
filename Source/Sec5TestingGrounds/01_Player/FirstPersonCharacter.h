@@ -52,11 +52,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Gun Configuration")
+	UPROPERTY(EditDefaultsOnly, Category = "Shooting Configuration")
 	TSubclassOf<class AGun> GunBlueprint;
 
 	/** AnimMontage to play each time we fire */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Configuration")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shooting Configuration")
 	class UAnimMontage* FireAnimation;
 
 	/** Whether to use motion controller location for aiming. */

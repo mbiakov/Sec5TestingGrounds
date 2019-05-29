@@ -11,6 +11,7 @@
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
 #include "03_Weapons/Gun.h"
+#include "Animation/AnimInstance.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -127,7 +128,19 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 void AFirstPersonCharacter::OnFire()
 {
-	if (Gun) Gun->OnFire();
+	if (!Gun) return;
+
+	Gun->OnFire();
+
+	// Play animation
+	if (FireAnimation)
+	{
+		UAnimInstance* AnimInstance = Mesh1P->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(FireAnimation, 1.f);
+		}
+	}
 }
 
 void AFirstPersonCharacter::OnResetVR()
