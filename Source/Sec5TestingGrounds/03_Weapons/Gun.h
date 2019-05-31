@@ -26,6 +26,7 @@ public:
 	AGun();
 
 	/** Fires a projectile. */
+	UFUNCTION(BlueprintCallable, Category = "Fire")
 	void OnFire();
 
 	/** Projectile class to spawn */
