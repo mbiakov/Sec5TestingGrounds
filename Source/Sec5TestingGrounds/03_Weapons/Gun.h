@@ -25,6 +25,8 @@ class SEC5TESTINGGROUNDS_API AGun : public AActor
 public:	
 	AGun();
 
+	class USkeletalMeshComponent* GetGunMesh() { return Gun; }
+
 	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = "Fire")
 	void OnFire();

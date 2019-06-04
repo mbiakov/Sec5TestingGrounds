@@ -12,8 +12,6 @@ AGun::AGun()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Gun"));
-	Gun->bCastDynamicShadow = false;
-	Gun->CastShadow = false;
 	SetRootComponent(Gun);
 
 	Muzzle = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle"));
