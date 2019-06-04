@@ -11,6 +11,8 @@ class SEC5TESTINGGROUNDS_API AUnitedCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	/** The default Mesh introduced by the ACharacter class is used as Third Person Mesh */
+
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	class USkeletalMeshComponent* FirstPersonMesh;
@@ -21,6 +23,8 @@ class SEC5TESTINGGROUNDS_API AUnitedCharacter : public ACharacter
 
 	/** First person Gun */
 	class AGun* FirstPersonGun;
+	/** Third person Gun */
+	class AGun* ThirdPersonGun;
 
 public:
 	AUnitedCharacter();
@@ -36,7 +40,10 @@ public:
 	/** Gun Class to Spawn */
 	UPROPERTY(EditDefaultsOnly, Category = "Shooting Configuration")
 	TSubclassOf<class AGun> GunBlueprint;
-	/** Gun Fire Animation */
+	/** First Person Gun Fire Animation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shooting Configuration")
-	class UAnimMontage* FireAnimation;
+	class UAnimMontage* FirstPersonFireAnimation;
+	/** Third Person Gun Fire Animation */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shooting Configuration")
+	class UAnimMontage* ThirdPersonFireAnimation;
 };

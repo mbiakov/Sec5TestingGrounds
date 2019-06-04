@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "03_Weapons/Gun.h"
 
 
@@ -25,6 +26,8 @@ AUnitedCharacter::AUnitedCharacter()
 	FirstPersonMesh->CastShadow = false;
 	FirstPersonMesh->RelativeRotation = FRotator(1.9f, -19.19f, 5.2f);
 	FirstPersonMesh->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
+
+	// The default Mesh introduced by the ACharacter class is used as Third Person Mesh
 }
 
 void AUnitedCharacter::BeginPlay()
@@ -41,9 +44,20 @@ void AUnitedCharacter::BeginPlay()
 	FirstPersonGun->GetGunMesh()->bCastDynamicShadow = false;
 	FirstPersonGun->GetGunMesh()->CastShadow = false;
 	// Configuration: firing animations
-	if (!ensure(FirstPersonMesh->GetAnimInstance() && FireAnimation)) return;
+	if (!ensure(FirstPersonMesh->GetAnimInstance() && FirstPersonFireAnimation)) return;
 	FirstPersonGun->SetAnimInstance(FirstPersonMesh->GetAnimInstance());
-	FirstPersonGun->SetFireAnimation(FireAnimation);
+	FirstPersonGun->SetFireAnimation(FirstPersonFireAnimation);
+
+	//Attach Third Person Gun to the Skeleton, doing it here because the skeleton is not yet created in the constructor and the GunBlueprint not yet setif (!ensure(GunBlueprint)) return;
+	ThirdPersonGun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
+	ThirdPersonGun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint")); // ACharacter::GetMesh() returns Mesh that is used as Third Person Skeletal Mesh
+	// Configuration: owner no see
+	ThirdPersonGun->SetOwner(this);
+	ThirdPersonGun->GetGunMesh()->SetOwnerNoSee(true);
+	// Configuration: firing animations
+	if (!ensure(GetMesh()->GetAnimInstance() && ThirdPersonFireAnimation)) return; // ACharacter::GetMesh() returns Mesh that is used as Third Person Skeletal Mesh
+	ThirdPersonGun->SetAnimInstance(GetMesh()->GetAnimInstance());
+	ThirdPersonGun->SetFireAnimation(ThirdPersonFireAnimation);
 }
 
 void AUnitedCharacter::Tick(float DeltaTime)
@@ -61,10 +75,15 @@ void AUnitedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void AUnitedCharacter::PullTrigger()
 {
-	if (!FirstPersonGun) return;
-	FirstPersonGun->OnFire();
+	if (!FirstPersonGun || !ThirdPersonGun) return;
 
-	// TODO The firing is different regarding if it is the Player or the AI. Use something like: if (GetPlayerPawn() == self).
-	// TODO ReportNoise: use GetActorLocation() as Noise Location and Self as Instigator
-	// TODO In Gun ?
+	// Depending on whether this is the Player Pawn or AI Pawn we fire respectively FirstPersonGun or ThirdPersonGun
+	if (this == UGameplayStatics::GetPlayerPawn(this, 0)) {
+		FirstPersonGun->OnFire();
+	}
+	else {
+		ThirdPersonGun->OnFire();
+	}
+
+	// TODO ReportNoise: use GetActorLocation() as Noise Location and Self as Instigator. In the Gun ?
 }
