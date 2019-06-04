@@ -3,6 +3,7 @@
 #include "Gun.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/AnimInstance.h"
 #include "03_Weapons/Projectile.h"
 
 
@@ -41,5 +42,10 @@ void AGun::OnFire()
 	if (FireSound != NULL)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
+
+	if (FireAnimation != NULL && AnimInstance != NULL)
+	{
+		AnimInstance->Montage_Play(FireAnimation, 1.f);
 	}
 }

@@ -25,11 +25,14 @@ class SEC5TESTINGGROUNDS_API AGun : public AActor
 public:	
 	AGun();
 
-	class USkeletalMeshComponent* GetGunMesh() { return Gun; }
-
-	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = "Fire")
 	void OnFire();
+
+	class USkeletalMeshComponent* GetGunMesh() { return Gun; }
+
+	/** Section: Fire Animation */
+	void SetAnimInstance(UAnimInstance* AnimInstanceToSet) { AnimInstance = AnimInstanceToSet; }
+	void SetFireAnimation(UAnimMontage* FireAnimationToSet) { FireAnimation = FireAnimationToSet; }
 
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = "Gun Configuration")
@@ -38,4 +41,9 @@ public:
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun Configuration")
 	class USoundBase* FireSound;
+
+private:
+	/** Section: Fire Animation */
+	class UAnimInstance* AnimInstance;
+	class UAnimMontage* FireAnimation;
 };

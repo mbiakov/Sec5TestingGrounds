@@ -35,10 +35,15 @@ void AUnitedCharacter::BeginPlay()
 	if (!ensure(GunBlueprint)) return;
 	FirstPersonGun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
 	FirstPersonGun->AttachToComponent(FirstPersonMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	// Configuration: only owner see
 	FirstPersonGun->SetOwner(this);
 	FirstPersonGun->GetGunMesh()->SetOnlyOwnerSee(true);
 	FirstPersonGun->GetGunMesh()->bCastDynamicShadow = false;
 	FirstPersonGun->GetGunMesh()->CastShadow = false;
+	// Configuration: firing animations
+	if (!ensure(FirstPersonMesh->GetAnimInstance() && FireAnimation)) return;
+	FirstPersonGun->SetAnimInstance(FirstPersonMesh->GetAnimInstance());
+	FirstPersonGun->SetFireAnimation(FireAnimation);
 }
 
 void AUnitedCharacter::Tick(float DeltaTime)
@@ -61,14 +66,4 @@ void AUnitedCharacter::OnFire()
 	// TODO In Gun ?
 
 	FirstPersonGun->OnFire();
-
-	// Play animation
-	if (FireAnimation)
-	{
-		UAnimInstance* AnimInstance = FirstPersonMesh->GetAnimInstance();
-		if (AnimInstance)
-		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
-		}
-	}
 }
