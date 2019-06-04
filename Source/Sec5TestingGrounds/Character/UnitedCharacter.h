@@ -26,6 +26,11 @@ public:
 	AUnitedCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
+
+	/** Fires a projectile. */
+	UFUNCTION(BlueprintCallable, Category = Setup)
+	void PullTrigger();
 
 	/** Section: First Person Gun */
 	/** Gun Class to Spawn */
@@ -34,11 +39,4 @@ public:
 	/** Gun Fire Animation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shooting Configuration")
 	class UAnimMontage* FireAnimation;
-
-protected:
-	virtual void BeginPlay() override;
-
-	/** Fires a projectile. */
-	UFUNCTION(BlueprintCallable, Category = Setup)
-	void OnFire();
 };

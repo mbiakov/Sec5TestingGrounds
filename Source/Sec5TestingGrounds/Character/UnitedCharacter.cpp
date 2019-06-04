@@ -54,16 +54,17 @@ void AUnitedCharacter::Tick(float DeltaTime)
 void AUnitedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	// Bind fire event
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AUnitedCharacter::PullTrigger);
 }
 
-void AUnitedCharacter::OnFire()
+void AUnitedCharacter::PullTrigger()
 {
-	// TODO The firing is different regarding if it is the Player or the AI. Use something like: if (GetPlayerPawn() == self).
-
 	if (!FirstPersonGun) return;
+	FirstPersonGun->OnFire();
 
+	// TODO The firing is different regarding if it is the Player or the AI. Use something like: if (GetPlayerPawn() == self).
 	// TODO ReportNoise: use GetActorLocation() as Noise Location and Self as Instigator
 	// TODO In Gun ?
-
-	FirstPersonGun->OnFire();
 }
