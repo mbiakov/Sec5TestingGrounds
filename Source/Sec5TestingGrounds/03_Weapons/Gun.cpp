@@ -17,7 +17,7 @@ AGun::AGun()
 
 	Muzzle = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle"));
 	Muzzle->SetupAttachment(Gun);
-	Muzzle->SetRelativeLocation(FVector(0.f, 59.f, 11.f));
+	Muzzle->SetRelativeLocation(FVector(0.f, 65.f, 11.f));
 }
 
 void AGun::OnFire()
