@@ -22,9 +22,7 @@ class SEC5TESTINGGROUNDS_API AUnitedCharacter : public ACharacter
 	class UCameraComponent* FirstPersonCameraComponent;
 
 	/** First person Gun */
-	class AGun* FirstPersonGun;
-	/** Third person Gun */
-	class AGun* ThirdPersonGun;
+	class AGun* Gun;
 
 public:
 	AUnitedCharacter();
@@ -46,4 +44,7 @@ public:
 	/** Third Person Gun Fire Animation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shooting Configuration")
 	class UAnimMontage* ThirdPersonFireAnimation;
+
+private:
+	void AttachGun();
 };

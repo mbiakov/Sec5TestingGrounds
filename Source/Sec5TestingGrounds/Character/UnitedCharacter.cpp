@@ -34,30 +34,9 @@ void AUnitedCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Attach First Person Gun to the Skeleton, doing it here because the skeleton is not yet created in the constructor and the GunBlueprint not yet set
-	if (!ensure(GunBlueprint)) return;
-	FirstPersonGun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
-	FirstPersonGun->AttachToComponent(FirstPersonMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-	// Configuration: only owner see
-	FirstPersonGun->SetOwner(this);
-	FirstPersonGun->GetGunMesh()->SetOnlyOwnerSee(true);
-	FirstPersonGun->GetGunMesh()->bCastDynamicShadow = false;
-	FirstPersonGun->GetGunMesh()->CastShadow = false;
-	// Configuration: firing animations
-	if (!ensure(FirstPersonMesh->GetAnimInstance() && FirstPersonFireAnimation)) return;
-	FirstPersonGun->SetAnimInstance(FirstPersonMesh->GetAnimInstance());
-	FirstPersonGun->SetFireAnimation(FirstPersonFireAnimation);
-
-	//Attach Third Person Gun to the Skeleton, doing it here because the skeleton is not yet created in the constructor and the GunBlueprint not yet setif (!ensure(GunBlueprint)) return;
-	ThirdPersonGun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
-	ThirdPersonGun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint")); // ACharacter::GetMesh() returns Mesh that is used as Third Person Skeletal Mesh
-	// Configuration: owner no see
-	ThirdPersonGun->SetOwner(this);
-	ThirdPersonGun->GetGunMesh()->SetOwnerNoSee(true);
-	// Configuration: firing animations
-	if (!ensure(GetMesh()->GetAnimInstance() && ThirdPersonFireAnimation)) return; // ACharacter::GetMesh() returns Mesh that is used as Third Person Skeletal Mesh
-	ThirdPersonGun->SetAnimInstance(GetMesh()->GetAnimInstance());
-	ThirdPersonGun->SetFireAnimation(ThirdPersonFireAnimation);
+	// Gun attachment is done here because in the constructor the skeleton is not yet created and the GunBlueprint is not yet set
+	AttachGun();
+	
 }
 
 void AUnitedCharacter::Tick(float DeltaTime)
@@ -75,15 +54,39 @@ void AUnitedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void AUnitedCharacter::PullTrigger()
 {
-	if (!FirstPersonGun || !ThirdPersonGun) return;
-
-	// Depending on whether this is the Player Pawn or AI Pawn we fire respectively FirstPersonGun or ThirdPersonGun
-	if (this == UGameplayStatics::GetPlayerPawn(this, 0)) {
-		FirstPersonGun->OnFire();
-	}
-	else {
-		ThirdPersonGun->OnFire();
-	}
+	if (!Gun) return;
+	Gun->OnFire();
 
 	// TODO ReportNoise: use GetActorLocation() as Noise Location and Self as Instigator. In the Gun ?
+}
+
+void AUnitedCharacter::AttachGun()
+{
+	if (!ensure(GunBlueprint)) return;
+	Gun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
+
+	if (IsPlayerControlled()) {
+		// Attaching to the First Person Skeletal Mesh and setting the First Person Fire animation
+		Gun->AttachToComponent(FirstPersonMesh, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+		// Configuration: only owner see
+		Gun->SetOwner(this);
+		Gun->GetGunMesh()->SetOnlyOwnerSee(true);
+		Gun->GetGunMesh()->bCastDynamicShadow = false;
+		Gun->GetGunMesh()->CastShadow = false;
+		// Configuration: firing animations
+		if (!ensure(FirstPersonMesh->GetAnimInstance() && FirstPersonFireAnimation)) return;
+		Gun->SetAnimInstance(FirstPersonMesh->GetAnimInstance());
+		Gun->SetFireAnimation(FirstPersonFireAnimation);
+	}
+	else { // Is AI Controlled
+		// Attaching to the Third Person Skeletal Mesh (ACharacter::GetMesh() returns Mesh that is used as Third Person Skeletal Mesh) and setting the Third Person Fire animation
+		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+		// Configuration: owner no see
+		Gun->SetOwner(this);
+		Gun->GetGunMesh()->SetOwnerNoSee(true);
+		// Configuration: firing animations
+		if (!ensure(GetMesh()->GetAnimInstance() && ThirdPersonFireAnimation)) return;
+		Gun->SetAnimInstance(GetMesh()->GetAnimInstance());
+		Gun->SetFireAnimation(ThirdPersonFireAnimation);
+	}
 }
