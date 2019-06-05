@@ -26,9 +26,11 @@ class SEC5TESTINGGROUNDS_API AUnitedCharacter : public ACharacter
 
 public:
 	AUnitedCharacter();
-	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+
+	/** When possessed by a Player, deteches the Gun from the First Person Mesh and attach it to the Third Person Mesh */
+	virtual void UnPossessed() override;
 
 	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = Setup)

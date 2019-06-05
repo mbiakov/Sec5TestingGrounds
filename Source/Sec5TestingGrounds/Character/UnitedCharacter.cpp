@@ -11,7 +11,7 @@
 
 AUnitedCharacter::AUnitedCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
@@ -39,9 +39,20 @@ void AUnitedCharacter::BeginPlay()
 	
 }
 
-void AUnitedCharacter::Tick(float DeltaTime)
+/** When possessed by a Player, deteches the Gun from the First Person Mesh and attach it to the Third Person Mesh */
+void AUnitedCharacter::UnPossessed()
 {
-	Super::Tick(DeltaTime);
+	if (IsPlayerControlled()) {
+		if (!Gun) return;
+		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+		// Configuration: owner no see
+		Gun->SetOwner(this);
+		Gun->GetGunMesh()->SetOnlyOwnerSee(false);
+		Gun->GetGunMesh()->bCastDynamicShadow = true;
+		Gun->GetGunMesh()->CastShadow = true;
+	}
+
+	Super::UnPossessed();
 }
 
 void AUnitedCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
