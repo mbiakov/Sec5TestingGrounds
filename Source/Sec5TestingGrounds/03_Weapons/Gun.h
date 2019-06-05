@@ -31,8 +31,8 @@ public:
 	class USkeletalMeshComponent* GetGunMesh() { return Gun; }
 
 	/** Section: Fire Animation */
-	void SetAnimInstance(UAnimInstance* AnimInstanceToSet) { AnimInstance = AnimInstanceToSet; }
-	void SetFireAnimation(UAnimMontage* FireAnimationToSet) { FireAnimation = FireAnimationToSet; }
+	void SetAnimInstance(class UAnimInstance* AnimInstanceToSet) { AnimInstance = AnimInstanceToSet; }
+	void SetFireAnimation(class UAnimMontage* FireAnimationToSet) { FireAnimation = FireAnimationToSet; }
 
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category = "Gun Configuration")
