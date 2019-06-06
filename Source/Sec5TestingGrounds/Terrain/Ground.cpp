@@ -51,8 +51,8 @@ void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint, f
 bool AGround::FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts)
 {
 	// Define the surface on which Actors have to Spawn. The surface is defined thanks to 2 points (Ground Floor Endpoints). These points are relative to the Ground Actor.
-	FVector FloorBottomRightEndpoint = FVector(0, 1950, 100);
-	FVector FloorTopLeftEndpoint = FVector(3950, -1950, 100);
+	FVector FloorBottomRightEndpoint = FVector(0, 1950, 0);
+	FVector FloorTopLeftEndpoint = FVector(3950, -1950, 0);
 	FBox SpawnableSurface = FBox(FloorBottomRightEndpoint, FloorTopLeftEndpoint);
 
 	for (int32 i = 0; i < MaxAttempts; i++)
