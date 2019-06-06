@@ -21,24 +21,30 @@ void AGround::Tick(float DeltaTime)
 }
 
 /**
-* Places X Actors, where X is a random number between MinSpawn and MaxSpawn.
+* Places X specified Actors, where X is a random number between MinSpawn and MaxSpawn.
 * The Actors will be placed only if an empty location is found. The MaxAttempts parameter specifies the number of attempts to find an empty location.
 * The NeededSpaceRadius specifies the radius within which we will look for collisions. Must be the space needed by the Actor.
+* The Actor can be scaled X times where X is a random float between MinScale and MaxScale. The NeededSpaceRadius will also be scaled with the actor.
 */
-void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius)
+void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius, float MinScale, float MaxScale)
 {
 	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 i = 0; i < NumberToSpawn; i++)
 	{
+		float Scale = FMath::FRandRange(MinScale, MaxScale);
 		FVector SpawnPoint(0);
-		if (FindEmptyLocation(SpawnPoint, NeededSpaceRadius, MaxAttempts)) PlaceActor(ActorToSpawn, SpawnPoint);
+		if (FindEmptyLocation(SpawnPoint, NeededSpaceRadius * Scale, MaxAttempts)) PlaceActor(ActorToSpawn, SpawnPoint, Scale);
 	}
 }
 
-void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint)
+/**
+* Places the specified scaled Actor at the specified SpawnPoint with a randomly generated rotation. 
+*/
+void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint, float Scale)
 {
 	FRotator RandomSpawnRotation = FRotator(0, FMath::FRandRange(0, 360), 0);
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnPoint, RandomSpawnRotation);
+	SpawnedActor->SetActorRelativeScale3D(FVector(Scale));
 	SpawnedActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), NAME_None);
 }
 
@@ -76,18 +82,6 @@ bool AGround::IsEmpty(FVector RelativeLocation, float Radius)
 		ECollisionChannel::ECC_GameTraceChannel2,
 		FCollisionShape::MakeSphere(Radius)
 	);
-
-	/** Draw Debug Cylinder useful to find the right Radius for an Actor */
-	/*FLinearColor ResultColor = HasHit ? FLinearColor::Red : FLinearColor::Green;
-	UKismetSystemLibrary::DrawDebugCylinder(
-		this,
-		GlobalLocation,
-		GlobalLocation + FVector(0, 0, 300),
-		Radius,
-		36,
-		ResultColor,
-		120
-	);*/
 
 	/** The location is empty if any hit was found */
 	return !HasHit;
