@@ -3,6 +3,7 @@
 #include "Ground.h"
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 
 
 AGround::AGround()
@@ -18,6 +19,48 @@ void AGround::BeginPlay()
 void AGround::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+/**
+* Generate grass on the Ground with the specified grass Hierarchical Instanced Static Mesh.
+* The Ground will be sliced in square tiles with specified dimension.
+* Each tile will be populated with X grass instances, where X is a random number between MinInstancesPerTile and MaxInstancesPerTile.
+*/
+void AGround::GenerateGrass(UHierarchicalInstancedStaticMeshComponent* GrassHISMC, float TileDimension, int32 MinInstancesPerTile, int32 MaxInstancesPerTile)
+{
+	TArray<FBox> Tiles = SliceGroundInTiles(TileDimension);
+	for (FBox Tile : Tiles)
+	{
+		int32 GrassInstances = FMath::RandRange(MinInstancesPerTile, MaxInstancesPerTile);
+		GenerateGrassOnTile(GrassHISMC, Tile, GrassInstances);
+	}
+}
+
+TArray<FBox> AGround::SliceGroundInTiles(float TileDimension)
+{
+	TArray<FBox> Tiles;
+
+	for (float ProgressionOnX = 0; ProgressionOnX < 4000; ProgressionOnX = ProgressionOnX + TileDimension)
+	{
+		for (float ProgressionOnY = -1950; ProgressionOnY < 1950; ProgressionOnY = ProgressionOnY + TileDimension)
+		{
+			FVector LeftBottom = FVector(ProgressionOnX, ProgressionOnY, 0);
+			FVector RightTop = FVector(ProgressionOnX + TileDimension, ProgressionOnY + TileDimension, 0);
+			FBox Tile = FBox(LeftBottom, RightTop);
+			Tiles.Add(Tile);
+		}
+	}
+
+	return Tiles;
+}
+
+void AGround::GenerateGrassOnTile(UHierarchicalInstancedStaticMeshComponent* GrassHISMC, FBox Tile, int32 Instances)
+{
+	for (int32 i = 0; i < Instances; i++)
+	{
+		FTransform SpawnTransform = FTransform(FRotator(0, FMath::FRandRange(-180, 180), 0), FMath::RandPointInBox(Tile));
+		GrassHISMC->AddInstance(SpawnTransform);
+	}
 }
 
 /**
@@ -42,7 +85,7 @@ void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int3
 */
 void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint, float Scale)
 {
-	FRotator RandomSpawnRotation = FRotator(0, FMath::FRandRange(0, 360), 0);
+	FRotator RandomSpawnRotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnPoint, RandomSpawnRotation);
 	SpawnedActor->SetActorRelativeScale3D(FVector(Scale));
 	SpawnedActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), NAME_None);
