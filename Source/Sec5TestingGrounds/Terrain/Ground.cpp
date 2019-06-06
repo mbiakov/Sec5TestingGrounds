@@ -8,7 +8,7 @@
 
 AGround::AGround()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 void AGround::BeginPlay()
