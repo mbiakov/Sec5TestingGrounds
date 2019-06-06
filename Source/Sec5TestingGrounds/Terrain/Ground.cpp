@@ -2,6 +2,7 @@
 
 #include "Ground.h"
 #include "Engine/World.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 AGround::AGround()
@@ -17,6 +18,9 @@ void AGround::BeginPlay()
 void AGround::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	CastSphere(GetActorLocation(), 300);
+	CastSphere(GetActorLocation() + FVector(0, 0, 1000), 300);
 }
 
 void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int32 MaxSpawn)
@@ -33,4 +37,28 @@ void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int3
 		AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnPoint, SpawnRotation);
 		SpawnedActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), NAME_None);
 	}
+}
+
+bool AGround::CastSphere(FVector Location, float Radius)
+{
+	FHitResult HitResult;
+	bool HasHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Location,
+		Location,
+		FQuat::Identity,
+		ECollisionChannel::ECC_Camera,
+		FCollisionShape::MakeSphere(Radius)
+	);
+
+	FLinearColor ResultColor = HasHit ? FLinearColor::Red : FLinearColor::Green;
+	UKismetSystemLibrary::DrawDebugSphere(
+		this,
+		Location,
+		Radius,
+		36,
+		ResultColor
+	);
+
+	return HasHit;
 }
