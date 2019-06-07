@@ -33,6 +33,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ground Generation")
 	void PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn = 1, int32 MaxSpawn = 1, int32 MaxAttempts = 20, float NeededSpaceRadius = 500, float MinScale = 1, float MaxScale = 1);
 
+	UFUNCTION(BlueprintCallable, Category = "Ground Navigation")
+	void SetNavMeshPoolRef(class UActorPool* NavMeshPoolRefToSet) { NavMeshPoolRef = NavMeshPoolRefToSet;  }
+
+protected:
+	/** Nav Mesh Bounds Volume game pool */
+	UPROPERTY(BlueprintReadOnly, Category = "Ground Navigation")
+	class UActorPool* NavMeshPoolRef;
+
 private:
 	/** Utilities for GenerateGrass */
 	TArray<FBox> SliceGroundInTiles(float TileDimension);

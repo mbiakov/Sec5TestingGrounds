@@ -20,6 +20,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Navigation")
 	void PopulateNavVolumePool();
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Navigation")
+	class UActorPool* NavMeshPool;
+
 private:
 	void AddToPool(class ANavMeshBoundsVolume* NavVolumeToAdd);
 };

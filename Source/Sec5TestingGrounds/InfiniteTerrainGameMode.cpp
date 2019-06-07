@@ -1,6 +1,7 @@
 // MBI Copyrights
 
 #include "InfiniteTerrainGameMode.h"
+#include "ActorPool.h"
 #include "AI/Navigation/NavMeshBoundsVolume.h"
 #include "EngineUtils.h"
 
@@ -12,6 +13,8 @@ AInfiniteTerrainGameMode::AInfiniteTerrainGameMode()
 	/*static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/Characters/BP_Character"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 	HUDClass = ASec5TestingGroundsHUD::StaticClass();*/
+
+	NavMeshPool = CreateDefaultSubobject<UActorPool>(FName("NavMeshPool"));
 }
 
 void AInfiniteTerrainGameMode::PopulateNavVolumePool()
