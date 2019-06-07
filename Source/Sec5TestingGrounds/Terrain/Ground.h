@@ -15,6 +15,8 @@ public:
 	AGround();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+	/** Used to return NavMeshBoundsVolume to the NavMeshBoundsVolumePoolRef */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	/**
 	* Generate grass on the Ground with the specified grass Hierarchical Instanced Static Mesh.
@@ -33,13 +35,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ground Generation")
 	void PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn = 1, int32 MaxSpawn = 1, int32 MaxAttempts = 20, float NeededSpaceRadius = 500, float MinScale = 1, float MaxScale = 1);
 
+	/**
+	* Checks out a NavMeshBoundsVolume from the Game Mode pool then configure it to use in this Ground.
+	*/
 	UFUNCTION(BlueprintCallable, Category = "Ground Navigation")
-	void SetNavMeshPoolRef(class UActorPool* NavMeshPoolRefToSet) { NavMeshPoolRef = NavMeshPoolRefToSet;  }
-
-protected:
-	/** Nav Mesh Bounds Volume game pool */
-	UPROPERTY(BlueprintReadOnly, Category = "Ground Navigation")
-	class UActorPool* NavMeshPoolRef;
+	void UseNavMeshBoundsVolumeFromPool(class UActorPool* NavMeshBoundsVolumePoolToUse);
 
 private:
 	/** Utilities for GenerateGrass */
@@ -50,4 +50,9 @@ private:
 	void PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint, float Scale);
 	bool FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts);
 	bool IsEmpty(FVector RelativeLocation, float Radius);
+
+	/** Utilities for UseNavMeshBoundsVolumeFromPool */
+	class UActorPool* NavMeshBoundsVolumePoolRef;
+	AActor* NavMeshBoundsVolume;
+	void PositionNavMeshBoundsVolume();
 };

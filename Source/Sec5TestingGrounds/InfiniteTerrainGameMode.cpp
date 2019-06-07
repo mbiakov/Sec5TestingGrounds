@@ -14,20 +14,15 @@ AInfiniteTerrainGameMode::AInfiniteTerrainGameMode()
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 	HUDClass = ASec5TestingGroundsHUD::StaticClass();*/
 
-	NavMeshPool = CreateDefaultSubobject<UActorPool>(FName("NavMeshPool"));
+	NavMeshBoundsVolumePool = CreateDefaultSubobject<UActorPool>(FName("NavMeshBoundsVolumePool"));
 }
 
-void AInfiniteTerrainGameMode::PopulateNavVolumePool()
+void AInfiniteTerrainGameMode::PopulateNavMeshBoundsVolumePool()
 {
 	TActorIterator<ANavMeshBoundsVolume> NavVolumeIterator = TActorIterator<ANavMeshBoundsVolume>(GetWorld());
 	while (NavVolumeIterator)
 	{
-		AddToPool(*NavVolumeIterator);
+		NavMeshBoundsVolumePool->AddToPool(*NavVolumeIterator);
 		++NavVolumeIterator;
 	}
-}
-
-void AInfiniteTerrainGameMode::AddToPool(ANavMeshBoundsVolume* NavVolumeToAdd)
-{
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *NavVolumeToAdd->GetName());
 }

@@ -1,6 +1,7 @@
 // MBI Copyrights
 
 #include "Ground.h"
+#include "ActorPool.h"
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
@@ -19,6 +20,19 @@ void AGround::BeginPlay()
 void AGround::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AGround::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (!NavMeshBoundsVolumePoolRef || !NavMeshBoundsVolume)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::EndPlay() NavMeshBoundsVolumePoolRef or NavMeshBoundsVolume not found"), *this->GetName());
+		return;
+	}
+	NavMeshBoundsVolumePoolRef->ReturnToPool(NavMeshBoundsVolume);
+	NavMeshBoundsVolume = nullptr;
 }
 
 /**
@@ -128,4 +142,32 @@ bool AGround::IsEmpty(FVector RelativeLocation, float Radius)
 
 	/** The location is empty if any hit was found */
 	return !HasHit;
+}
+
+/**
+* Checks out a NavMeshBoundsVolume from the Game Mode pool then configure it to use in this Ground.
+*/
+void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoolToUse)
+{
+	NavMeshBoundsVolumePoolRef = NavMeshBoundsVolumePoolToUse;
+
+	PositionNavMeshBoundsVolume();
+}
+
+void AGround::PositionNavMeshBoundsVolume()
+{
+	if (!NavMeshBoundsVolumePoolRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() NavMeshBoundsVolumePoolRef isn't set"), *this->GetName());
+		return;
+	}
+	NavMeshBoundsVolume = NavMeshBoundsVolumePoolRef->Checkout();
+
+	if (!NavMeshBoundsVolume)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() unable to get a NavMesh from Pool"), *this->GetName());
+		return;
+	}
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + FVector(2000, 0, 0));
+	// TODO Force navigation recalculation
 }
