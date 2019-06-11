@@ -12,7 +12,7 @@ UActorPool::UActorPool()
 AActor* UActorPool::Checkout()
 {
 	if (ActorPool.Num() <= 0) {
-		UE_LOG(LogTemp, Error, TEXT("%s UActorPool::Checkout() doesn't have any available Actor in Pool"), *this->GetName());
+		UE_LOG(LogTemp, Error, TEXT("%s UActorPool::Checkout() doesn't have any available Actor in Pool"), *GetName());
 		return nullptr;
 	}
 	return ActorPool.Pop();
@@ -25,5 +25,5 @@ void UActorPool::ReturnToPool(AActor* ActorToReturn)
 
 void UActorPool::AddToPool(AActor* ActorToAdd)
 {
-	ActorPool.Add(ActorToAdd);
+	ActorPool.Push(ActorToAdd);
 }

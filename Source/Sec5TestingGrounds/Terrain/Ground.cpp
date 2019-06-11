@@ -28,7 +28,7 @@ void AGround::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	if (!NavMeshBoundsVolumePoolRef || !NavMeshBoundsVolume)
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::EndPlay() NavMeshBoundsVolumePoolRef or NavMeshBoundsVolume not found"), *this->GetName());
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::EndPlay() NavMeshBoundsVolumePoolRef or NavMeshBoundsVolume not found"), *GetName());
 		return;
 	}
 	NavMeshBoundsVolumePoolRef->ReturnToPool(NavMeshBoundsVolume);
@@ -54,12 +54,12 @@ TArray<FBox> AGround::SliceGroundInTiles(float TileDimension)
 {
 	TArray<FBox> Tiles;
 
-	for (float ProgressionOnX = 0; ProgressionOnX < 4000; ProgressionOnX = ProgressionOnX + TileDimension)
+	for (float ProgressionOnX = MinExtent.X; ProgressionOnX < MaxExtent.X; ProgressionOnX = ProgressionOnX + TileDimension)
 	{
-		for (float ProgressionOnY = -1950; ProgressionOnY < 1950; ProgressionOnY = ProgressionOnY + TileDimension)
+		for (float ProgressionOnY = MinExtent.Y; ProgressionOnY < MaxExtent.Y; ProgressionOnY = ProgressionOnY + TileDimension)
 		{
-			FVector LeftBottom = FVector(ProgressionOnX, ProgressionOnY, 0);
-			FVector RightTop = FVector(ProgressionOnX + TileDimension, ProgressionOnY + TileDimension, 0);
+			FVector LeftBottom = FVector(ProgressionOnX, ProgressionOnY, MinExtent.Z);
+			FVector RightTop = FVector(ProgressionOnX + TileDimension, ProgressionOnY + TileDimension, MinExtent.Z);
 			FBox Tile = FBox(LeftBottom, RightTop);
 			Tiles.Add(Tile);
 		}
@@ -108,9 +108,7 @@ void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint, f
 bool AGround::FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts)
 {
 	// Define the surface on which Actors have to Spawn. The surface is defined thanks to 2 points (Ground Floor Endpoints). These points are relative to the Ground Actor.
-	FVector FloorBottomRightEndpoint = FVector(0, 1950, 0);
-	FVector FloorTopLeftEndpoint = FVector(3950, -1950, 0);
-	FBox SpawnableSurface = FBox(FloorBottomRightEndpoint, FloorTopLeftEndpoint);
+	FBox SpawnableSurface = FBox(MinExtent, MaxExtent);
 
 	for (int32 i = 0; i < MaxAttempts; i++)
 	{
@@ -158,16 +156,16 @@ void AGround::PositionNavMeshBoundsVolume()
 {
 	if (!NavMeshBoundsVolumePoolRef)
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() NavMeshBoundsVolumePoolRef isn't set"), *this->GetName());
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() NavMeshBoundsVolumePoolRef isn't set"), *GetName());
 		return;
 	}
 	NavMeshBoundsVolume = NavMeshBoundsVolumePoolRef->Checkout();
 
 	if (!NavMeshBoundsVolume)
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() unable to get a NavMesh from Pool"), *this->GetName());
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() unable to get a NavMesh from Pool"), *GetName());
 		return;
 	}
-	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + FVector(2000, 0, 0));
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + FVector((MinExtent.X + MaxExtent.X) / 2, (MinExtent.Y + MaxExtent.Y) / 2, (MinExtent.Z + MaxExtent.Z) / 2));
 	// TODO Force navigation recalculation
 }

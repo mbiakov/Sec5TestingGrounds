@@ -41,6 +41,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Ground Navigation")
 	void UseNavMeshBoundsVolumeFromPool(class UActorPool* NavMeshBoundsVolumePoolToUse);
 
+protected:
+	/** Ground Dimensions. Must be set from the Editor if the Ground dimensions and location change. */
+	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
+	FVector MinExtent = FVector(0, -2000, 0);
+	UPROPERTY(EditDefaultsOnly, Category = "Configuration")
+	FVector MaxExtent = FVector(4000, 2000, 0);
+
 private:
 	/** Utilities for GenerateGrass */
 	TArray<FBox> SliceGroundInTiles(float TileDimension);
