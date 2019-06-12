@@ -5,6 +5,7 @@
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "AI/Navigation/NavigationSystem.h"
 
 
 AGround::AGround()
@@ -86,23 +87,32 @@ void AGround::GenerateGrassOnTile(UHierarchicalInstancedStaticMeshComponent* Gra
 void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius, float MinScale, float MaxScale)
 {
 	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
-	for (int32 i = 0; i < NumberToSpawn; i++)
-	{
-		float Scale = FMath::FRandRange(MinScale, MaxScale);
-		FVector SpawnPoint(0);
-		if (FindEmptyLocation(SpawnPoint, NeededSpaceRadius * Scale, MaxAttempts)) PlaceActor(ActorToSpawn, SpawnPoint, Scale);
-	}
+	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(NumberToSpawn, MinScale, MaxScale, NeededSpaceRadius, MaxAttempts);
+	for (FSpawnPosition SpawnPosition : SpawnPositions) PlaceActor(ActorToSpawn, SpawnPosition);
 }
 
 /**
 * Places the specified scaled Actor at the specified SpawnPoint with a randomly generated rotation. 
 */
-void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, FVector SpawnPoint, float Scale)
+void AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition)
 {
-	FRotator RandomSpawnRotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnPoint, RandomSpawnRotation);
-	SpawnedActor->SetActorRelativeScale3D(FVector(Scale));
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnPosition.Location, SpawnPosition.Rotation);
+	SpawnedActor->SetActorRelativeScale3D(FVector(SpawnPosition.Scale));
 	SpawnedActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), NAME_None);
+}
+
+TArray<FSpawnPosition> AGround::GenerateSpawnPositions(int32 NumberToSpawn, float MinScale, float MaxScale, float NeededSpaceRadius, int32 MaxAttempts)
+{
+	TArray<FSpawnPosition> ResultSpawnPositions;
+	for (int32 i = 0; i < NumberToSpawn; i++)
+	{
+		FSpawnPosition SpawnPosition;
+		SpawnPosition.Location = FVector(0);
+		SpawnPosition.Rotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
+		SpawnPosition.Scale = FMath::FRandRange(MinScale, MaxScale);
+		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts)) ResultSpawnPositions.Push(SpawnPosition);
+	}
+	return ResultSpawnPositions;
 }
 
 bool AGround::FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts)
@@ -147,25 +157,25 @@ bool AGround::IsEmpty(FVector RelativeLocation, float Radius)
 */
 void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoolToUse)
 {
+	if (!NavMeshBoundsVolumePoolToUse)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s AGround::UseNavMeshBoundsVolumeFromPool() got a NavMeshBoundsVolumePoolToUse that is not set"), *GetName());
+		return;
+	}
 	NavMeshBoundsVolumePoolRef = NavMeshBoundsVolumePoolToUse;
+	NavMeshBoundsVolume = NavMeshBoundsVolumePoolRef->Checkout();
 
 	PositionNavMeshBoundsVolume();
+
+	GetWorld()->GetNavigationSystem()->Build();
 }
 
 void AGround::PositionNavMeshBoundsVolume()
 {
-	if (!NavMeshBoundsVolumePoolRef)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() NavMeshBoundsVolumePoolRef isn't set"), *GetName());
-		return;
-	}
-	NavMeshBoundsVolume = NavMeshBoundsVolumePoolRef->Checkout();
-
 	if (!NavMeshBoundsVolume)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() unable to get a NavMesh from Pool"), *GetName());
 		return;
 	}
 	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + FVector((MinExtent.X + MaxExtent.X) / 2, (MinExtent.Y + MaxExtent.Y) / 2, (MinExtent.Z + MaxExtent.Z) / 2));
-	// TODO Force navigation recalculation
 }
