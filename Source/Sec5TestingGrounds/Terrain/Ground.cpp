@@ -26,11 +26,8 @@ void AGround::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	if (!NavMeshBoundsVolumePoolRef || !NavMeshBoundsVolume)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::EndPlay() NavMeshBoundsVolumePoolRef or NavMeshBoundsVolume not found"), *GetName());
-		return;
-	}
+	if (!ensure(NavMeshBoundsVolumePoolRef)) return;
+	if (!ensure(NavMeshBoundsVolume)) return;
 	NavMeshBoundsVolumePoolRef->ReturnToPool(NavMeshBoundsVolume);
 	NavMeshBoundsVolume = nullptr;
 }
@@ -43,11 +40,7 @@ void AGround::EndPlay(const EEndPlayReason::Type EndPlayReason)
 */
 void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius, float MinScale, float MaxScale)
 {
-	if (!ActorToSpawn)
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceActors() called with no ActorToSpawn"));
-		return;
-	}
+	if (!ensure(ActorToSpawn)) return;
 
 	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 i = 0; i < NumberToSpawn; i++)
@@ -64,26 +57,20 @@ void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int3
 */
 void AGround::PlaceAIPawns(TSubclassOf<APawn> PawnToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius)
 {
-	if (!PawnToSpawn)
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceAIPawns() called with no PawnToSpawn"));
-		return;
-	}
+	if (!ensure(PawnToSpawn)) return;
 
 	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 i = 0; i < NumberToSpawn; i++)
 	{
 		FSpawnPosition SpawnPosition = FSpawnPosition();
-		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts)) {
+		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts))
+		{
 			// The BP_Character has an offset of 100cm on Z axis
 			SpawnPosition.Location = SpawnPosition.Location + FVector(0, 0, 100);
+
 			APawn* PlacedPawn = Cast<APawn>(PlaceActor(PawnToSpawn, SpawnPosition));
 			
-			if (!PlacedPawn)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AGround::PlaceAIPawns() got a nullptr in PlacedPawn"));
-				return;
-			}
+			if (!ensure(PlacedPawn)) return;
 			PlacedPawn->SpawnDefaultController();
 		}
 	}
@@ -96,11 +83,7 @@ void AGround::PlaceAIPawns(TSubclassOf<APawn> PawnToSpawn, int32 MinSpawn, int32
 */
 void AGround::GenerateGrass(UHierarchicalInstancedStaticMeshComponent* GrassHISMC, float TileDimension, int32 MinInstancesPerTile, int32 MaxInstancesPerTile)
 {
-	if (!GrassHISMC)
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGround::GenerateGrass() called with no GrassHISMC"));
-		return;
-	}
+	if (!ensure(GrassHISMC)) return;
 
 	TArray<FBox> Tiles = SliceGroundInTiles(TileDimension);
 	for (FBox Tile : Tiles)
@@ -115,11 +98,8 @@ void AGround::GenerateGrass(UHierarchicalInstancedStaticMeshComponent* GrassHISM
 */
 void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoolToUse)
 {
-	if (!NavMeshBoundsVolumePoolToUse)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::UseNavMeshBoundsVolumeFromPool() got a NavMeshBoundsVolumePoolToUse that is not set"), *GetName());
-		return;
-	}
+	if (!ensure(NavMeshBoundsVolumePoolToUse)) return;
+
 	NavMeshBoundsVolumePoolRef = NavMeshBoundsVolumePoolToUse;
 	NavMeshBoundsVolume = NavMeshBoundsVolumePoolRef->Checkout();
 
@@ -140,19 +120,11 @@ void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoo
 */
 AActor* AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition)
 {
-	if (!ActorToSpawn)
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceActor() called with no ActorToSpawn"));
-		return nullptr;
-	}
+	if (!ensure(ActorToSpawn)) return nullptr;
 	// Adding a temporary empty location here, else the Actor will be spawned at (0, 0, 0) where an object has potentially been placed
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, FVector(0, 0, 5000), FRotator(0));
 
-	if (!SpawnedActor)
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceActor() unable to spawn Actor"));
-		return nullptr;
-	}
+	if (!ensure(SpawnedActor)) return nullptr;
 	SpawnedActor->SetActorLocation(SpawnPosition.Location);
 	SpawnedActor->SetActorRotation(SpawnPosition.Rotation);
 	SpawnedActor->SetActorRelativeScale3D(FVector(SpawnPosition.Scale));
@@ -224,6 +196,7 @@ TArray<FBox> AGround::SliceGroundInTiles(float TileDimension)
 
 void AGround::GenerateGrassOnTile(UHierarchicalInstancedStaticMeshComponent* GrassHISMC, FBox Tile, int32 Instances)
 {
+	if (!ensure(GrassHISMC)) return;
 	for (int32 i = 0; i < Instances; i++)
 	{
 		FTransform SpawnTransform = FTransform(FRotator(0, FMath::FRandRange(-180, 180), 0), FMath::RandPointInBox(Tile));
@@ -240,10 +213,6 @@ void AGround::GenerateGrassOnTile(UHierarchicalInstancedStaticMeshComponent* Gra
 */
 void AGround::PositionNavMeshBoundsVolume()
 {
-	if (!NavMeshBoundsVolume)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s AGround::PositionNavMeshBoundsVolume() unable to get a NavMesh from Pool"), *GetName());
-		return;
-	}
+	if (!ensure(NavMeshBoundsVolume)) return;
 	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + FVector((MinExtent.X + MaxExtent.X) / 2, (MinExtent.Y + MaxExtent.Y) / 2, (MinExtent.Z + MaxExtent.Z) / 2));
 }
