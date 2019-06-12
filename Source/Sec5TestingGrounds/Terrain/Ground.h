@@ -11,6 +11,19 @@ struct FSpawnPosition
 {
 	GENERATED_USTRUCT_BODY()
 
+	FSpawnPosition()
+	{
+		Location = FVector(0);
+		Rotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
+		Scale = 1;
+	};
+	FSpawnPosition(float MinScale, float MaxScale)
+	{
+		Location = FVector(0);
+		Rotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
+		Scale = FMath::FRandRange(MinScale, MaxScale);
+	};
+
 	FVector Location;
 	FRotator Rotation;
 	float Scale;
@@ -49,7 +62,7 @@ public:
 	/**
 	* Checks out a NavMeshBoundsVolume from the Game Mode pool then configure it to use in this Ground.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "Ground Navigation")
+	UFUNCTION(BlueprintCallable, Category = "Ground Generation")
 	void UseNavMeshBoundsVolumeFromPool(class UActorPool* NavMeshBoundsVolumePoolToUse);
 
 protected:
@@ -60,15 +73,14 @@ protected:
 	FVector MaxExtent = FVector(4000, 2000, 0);
 
 private:
+	/** Utilities for PlaceActors */
+	AActor* PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition);
+	bool FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts);
+	bool IsEmpty(FVector RelativeLocation, float Radius);
+
 	/** Utilities for GenerateGrass */
 	TArray<FBox> SliceGroundInTiles(float TileDimension);
 	void GenerateGrassOnTile(class UHierarchicalInstancedStaticMeshComponent* GrassHISMC, FBox Tile, int32 Instances);
-
-	/** Utilities for PlaceActors */
-	void PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition);
-	TArray<FSpawnPosition> GenerateSpawnPositions(int32 NumberToSpawn, float MinScale, float MaxScale, float NeededSpaceRadius, int32 MaxAttempts);
-	bool FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts);
-	bool IsEmpty(FVector RelativeLocation, float Radius);
 
 	/** Utilities for UseNavMeshBoundsVolumeFromPool */
 	class UActorPool* NavMeshBoundsVolumePoolRef;
