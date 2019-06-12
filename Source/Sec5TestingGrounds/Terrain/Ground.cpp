@@ -43,12 +43,49 @@ void AGround::EndPlay(const EEndPlayReason::Type EndPlayReason)
 */
 void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius, float MinScale, float MaxScale)
 {
-	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
+	if (!ActorToSpawn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceActors() called with no ActorToSpawn"));
+		return;
+	}
 
+	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 i = 0; i < NumberToSpawn; i++)
 	{
 		FSpawnPosition SpawnPosition = FSpawnPosition(MinScale, MaxScale);
 		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts)) PlaceActor(ActorToSpawn, SpawnPosition);
+	}
+}
+
+/**
+* Places X specified Pawns, where X is a random number between MinSpawn and MaxSpawn.
+* The Pawns will be placed only if an empty location is found. The MaxAttempts parameter specifies the number of attempts to find an empty location.
+* The NeededSpaceRadius specifies the radius within which we will look for collisions. Must be the space needed by the Actor.
+*/
+void AGround::PlaceAIPawns(TSubclassOf<APawn> PawnToSpawn, int32 MinSpawn, int32 MaxSpawn, int32 MaxAttempts, float NeededSpaceRadius)
+{
+	if (!PawnToSpawn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceAIPawns() called with no PawnToSpawn"));
+		return;
+	}
+
+	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
+	for (int32 i = 0; i < NumberToSpawn; i++)
+	{
+		FSpawnPosition SpawnPosition = FSpawnPosition();
+		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts)) {
+			// The BP_Character has an offset of 100cm on Z axis
+			SpawnPosition.Location = SpawnPosition.Location + FVector(0, 0, 100);
+			APawn* PlacedPawn = Cast<APawn>(PlaceActor(PawnToSpawn, SpawnPosition));
+			
+			if (!PlacedPawn)
+			{
+				UE_LOG(LogTemp, Error, TEXT("AGround::PlaceAIPawns() got a nullptr in PlacedPawn"));
+				return;
+			}
+			PlacedPawn->SpawnDefaultController();
+		}
 	}
 }
 
@@ -59,6 +96,12 @@ void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int3
 */
 void AGround::GenerateGrass(UHierarchicalInstancedStaticMeshComponent* GrassHISMC, float TileDimension, int32 MinInstancesPerTile, int32 MaxInstancesPerTile)
 {
+	if (!GrassHISMC)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGround::GenerateGrass() called with no GrassHISMC"));
+		return;
+	}
+
 	TArray<FBox> Tiles = SliceGroundInTiles(TileDimension);
 	for (FBox Tile : Tiles)
 	{
@@ -97,7 +140,21 @@ void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoo
 */
 AActor* AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition)
 {
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnPosition.Location, SpawnPosition.Rotation);
+	if (!ActorToSpawn)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceActor() called with no ActorToSpawn"));
+		return nullptr;
+	}
+	// Adding a temporary empty location here, else the Actor will be spawned at (0, 0, 0) where an object has potentially been placed
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, FVector(0, 0, 5000), FRotator(0));
+
+	if (!SpawnedActor)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGround::PlaceActor() unable to spawn Actor"));
+		return nullptr;
+	}
+	SpawnedActor->SetActorLocation(SpawnPosition.Location);
+	SpawnedActor->SetActorRotation(SpawnPosition.Rotation);
 	SpawnedActor->SetActorRelativeScale3D(FVector(SpawnPosition.Scale));
 	SpawnedActor->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), NAME_None);
 	return SpawnedActor;
