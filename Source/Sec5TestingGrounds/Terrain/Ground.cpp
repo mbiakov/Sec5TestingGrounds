@@ -12,16 +12,6 @@ AGround::AGround()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-void AGround::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void AGround::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void AGround::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -45,7 +35,7 @@ void AGround::PlaceActors(TSubclassOf<AActor> ActorToSpawn, int32 MinSpawn, int3
 	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 i = 0; i < NumberToSpawn; i++)
 	{
-		FSpawnPosition SpawnPosition = FSpawnPosition(MinScale, MaxScale);
+		FSpawnParameters SpawnPosition = FSpawnParameters(MinScale, MaxScale);
 		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts)) PlaceActor(ActorToSpawn, SpawnPosition);
 	}
 }
@@ -62,7 +52,7 @@ void AGround::PlaceAIPawns(TSubclassOf<APawn> PawnToSpawn, int32 MinSpawn, int32
 	int32 NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
 	for (int32 i = 0; i < NumberToSpawn; i++)
 	{
-		FSpawnPosition SpawnPosition = FSpawnPosition();
+		FSpawnParameters SpawnPosition = FSpawnParameters();
 		if (FindEmptyLocation(SpawnPosition.Location, NeededSpaceRadius * SpawnPosition.Scale, MaxAttempts))
 		{
 			// The BP_Character has an offset of 100cm on Z axis
@@ -118,7 +108,7 @@ void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoo
 /**
 * Places the specified scaled Actor at the specified SpawnPoint with a randomly generated rotation.
 */
-AActor* AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition)
+AActor* AGround::PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnParameters& SpawnPosition)
 {
 	if (!ensure(ActorToSpawn)) return nullptr;
 	// Adding a temporary empty location here, else the Actor will be spawned at (0, 0, 0) where an object has potentially been placed

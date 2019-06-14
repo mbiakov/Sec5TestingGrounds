@@ -7,17 +7,18 @@
 #include "Ground.generated.h"
 
 USTRUCT()
-struct FSpawnPosition
+struct FSpawnParameters
 {
 	GENERATED_USTRUCT_BODY()
 
-	FSpawnPosition()
+	FSpawnParameters()
 	{
 		Location = FVector(0);
 		Rotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
 		Scale = 1;
 	};
-	FSpawnPosition(float MinScale, float MaxScale)
+
+	FSpawnParameters(float MinScale, float MaxScale)
 	{
 		Location = FVector(0);
 		Rotation = FRotator(0, FMath::FRandRange(-180, 180), 0);
@@ -37,8 +38,7 @@ class SEC5TESTINGGROUNDS_API AGround : public AActor
 	
 public:	
 	AGround();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+
 	/** Used to return NavMeshBoundsVolume to the NavMeshBoundsVolumePoolRef */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -82,7 +82,7 @@ protected:
 
 private:
 	/** Utilities for PlaceActors */
-	AActor* PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnPosition& SpawnPosition);
+	AActor* PlaceActor(TSubclassOf<AActor> ActorToSpawn, const FSpawnParameters& SpawnPosition);
 	bool FindEmptyLocation(FVector& OutLocation, float NeededSpaceRadius, int32 MaxAttempts);
 	bool IsEmpty(FVector RelativeLocation, float Radius);
 
