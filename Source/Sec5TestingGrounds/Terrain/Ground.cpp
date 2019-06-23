@@ -4,7 +4,7 @@
 #include "ActorPool.h"
 #include "Engine/World.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
-#include "AI/Navigation/NavigationSystem.h"
+#include "AI/NavigationSystemBase.h"
 
 
 AGround::AGround()
@@ -95,7 +95,7 @@ void AGround::UseNavMeshBoundsVolumeFromPool(UActorPool * NavMeshBoundsVolumePoo
 
 	PositionNavMeshBoundsVolume();
 
-	GetWorld()->GetNavigationSystem()->Build();
+	FNavigationSystem::Build(*GetWorld());
 }
 
 /** 
@@ -149,7 +149,7 @@ bool AGround::IsEmpty(FVector RelativeLocation, float Radius)
 	bool HasHit = GetWorld()->SweepSingleByChannel(
 		HitResult,
 		GlobalLocation,
-		GlobalLocation,
+		GlobalLocation + FVector(0, 0, 0.01), // Sweep end location cannot be the same as the start location
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel2,
 		FCollisionShape::MakeSphere(Radius)
