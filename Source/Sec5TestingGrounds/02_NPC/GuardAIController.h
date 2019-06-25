@@ -10,6 +10,17 @@
 #include "GuardAIController.generated.h"
 
 /**
+ * Guard Behavior State used to determine the Bahavior
+ */
+UENUM()
+enum EGuardBahaviorState
+{
+	NoOngoingAction,
+	MovingToTheNextWaypoint,
+	Waiting,
+};
+
+/**
  * 
  */
 UCLASS()
@@ -20,6 +31,7 @@ class SEC5TESTINGGROUNDS_API AGuardAIController : public AAIController
 public:
 	AGuardAIController();
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	// Perceprion
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Perception")
@@ -31,12 +43,25 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "EQS")
 	class UEnvQuery* EQSQuery;
 
+	// Behavior
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	float MinWaitTime = 2;
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	float MaxWaitTime = 4;
+
 private:
+	// Behavior
+	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
+	float MovementStartedAt = 0;
+	float ActualWaitTime = 0;
+	float WaitStartedAt = 0;
+
 	// Perceprion
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
 	// EQS
-	void OnQueryFinished(TSharedPtr<FEnvQueryResult> Result);
-	FEnvQueryRequest EQSRequest;
+	void MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result);
+	FEnvQueryRequest FindNextWaypointEQSRequest;
+	FVector NextWaypoint = FVector(0);
 };

@@ -37,8 +37,37 @@ void AGuardAIController::BeginPlay()
 	Super::BeginPlay();
 	
 	if (!ensure(EQSQuery)) return;
-	EQSRequest = FEnvQueryRequest(EQSQuery, this);
-	EQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::OnQueryFinished);
+	FindNextWaypointEQSRequest = FEnvQueryRequest(EQSQuery, this);
+}
+
+void AGuardAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	if (ActualGuardBehavior == EGuardBahaviorState::NoOngoingAction) {
+		MovementStartedAt = GetWorld()->GetTimeSeconds();
+		FindNextWaypointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextWaypoint);
+		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextWaypoint;
+		return;
+	}
+
+	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextWaypoint) {
+		if (GetPawn()->GetVelocity().Size() == 0 && GetWorld()->GetTimeSeconds() - MovementStartedAt >= 1) { // Need to wait a second before checking Velocity, because at the beginning of the movement the Velocity is 0
+			WaitStartedAt = GetWorld()->GetTimeSeconds();
+			ActualWaitTime = FMath::FRandRange(MinWaitTime, MaxWaitTime);
+			ActualGuardBehavior = EGuardBahaviorState::Waiting;
+			return;
+		}
+	}
+
+	if (ActualGuardBehavior == EGuardBahaviorState::Waiting) {
+		if (GetWorld()->GetTimeSeconds() - WaitStartedAt >= ActualWaitTime) {
+			WaitStartedAt = 0;
+			ActualWaitTime = 0;
+			ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
+			return;
+		}
+	}
 }
 
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
@@ -46,8 +75,8 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 	UE_LOG(LogTemp, Warning, TEXT("Actor: %s ||| Stimulus: %i"), *Actor->GetName(), Stimulus.WasSuccessfullySensed());
 }
 
-void AGuardAIController::OnQueryFinished(TSharedPtr<FEnvQueryResult> Result)
+void AGuardAIController::MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result)
 {
-	FVector NextWaypoint = Result->GetItemAsLocation(0);
-	UE_LOG(LogTemp, Warning, TEXT("Next waypoint: %s"), *NextWaypoint.ToString());
+	NextWaypoint = Result->GetItemAsLocation(0);
+	MoveToLocation(NextWaypoint, 10);
 }
