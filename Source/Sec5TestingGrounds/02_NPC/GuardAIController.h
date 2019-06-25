@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Perception/AIPerceptionTypes.h"
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "GuardAIController.generated.h"
@@ -22,4 +23,8 @@ public:
 
 	class UAISenseConfig_Sight* Sight;
 	class UAISenseConfig_Hearing* Hearing;
+
+private:
+	UFUNCTION()
+	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 };

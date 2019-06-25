@@ -7,6 +7,7 @@
 
 AGuardAIController::AGuardAIController()
 {
+	// Start Perception Configuration
 	AIPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(FName("AIPerceptionComponent"));
 
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(FName("Sight"));
@@ -26,4 +27,12 @@ AGuardAIController::AGuardAIController()
 	AIPerceptionComponent->ConfigureSense(*Hearing);
 
 	AIPerceptionComponent->SetDominantSense(Sight->GetSenseImplementation());
+
+	AIPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+	// End Perception Configuration
+}
+
+void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Actor: %s ||| Stimulus: %i"), *Actor->GetName(), Stimulus.WasSuccessfullySensed());
 }
