@@ -32,7 +32,22 @@ AGuardAIController::AGuardAIController()
 	// End Perception Configuration
 }
 
+void AGuardAIController::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (!ensure(EQSQuery)) return;
+	EQSRequest = FEnvQueryRequest(EQSQuery, this);
+	EQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::OnQueryFinished);
+}
+
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Actor: %s ||| Stimulus: %i"), *Actor->GetName(), Stimulus.WasSuccessfullySensed());
+}
+
+void AGuardAIController::OnQueryFinished(TSharedPtr<FEnvQueryResult> Result)
+{
+	FVector NextWaypoint = Result->GetItemAsLocation(0);
+	UE_LOG(LogTemp, Warning, TEXT("Next waypoint: %s"), *NextWaypoint.ToString());
 }
