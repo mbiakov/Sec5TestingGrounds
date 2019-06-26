@@ -55,7 +55,12 @@ void AGuardAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// State Transitions
+	PerformStateTransitions();
+	ExecuteStateActions();
+}
+
+void AGuardAIController::PerformStateTransitions()
+{
 	// For the following State Transition, if the Enemy is detected, we must enter the state EnemyDetected independently of the actual state.
 	// We still must verify that we are not already in the State EnemyDetected, else the transition actions will be always executed.
 	if (ActualGuardBehavior != EGuardBahaviorState::EnemyDetected && EnemyDetected) {
@@ -83,8 +88,10 @@ void AGuardAIController::Tick(float DeltaTime)
 		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
 	}
+}
 
-	// State Actions
+void AGuardAIController::ExecuteStateActions()
+{
 	if (ActualGuardBehavior == EGuardBahaviorState::EnemyDetected) {
 		MoveToActor(DetectedEnemy, 300);
 		ShootAtEnemy();

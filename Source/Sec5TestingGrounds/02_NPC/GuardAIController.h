@@ -65,6 +65,10 @@ public:
 
 private:
 	/** Behavior */
+	void PerformStateTransitions();
+	void ExecuteStateActions();
+
+	/** Behavior Utilities */
 	bool NoMoreMovement();
 	class AUnitedCharacter* ControlledCharacter;
 	FTimerUtility Timer = FTimerUtility();
