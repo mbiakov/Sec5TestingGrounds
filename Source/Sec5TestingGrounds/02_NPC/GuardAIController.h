@@ -22,7 +22,7 @@ enum EGuardBahaviorState
 };
 
 /**
- * 
+ * The controlled Pawn must be of class AUnitedCharacter to manage MustAim variable used in AUnitedCharacter Animations.
  */
 UCLASS()
 class SEC5TESTINGGROUNDS_API AGuardAIController : public AAIController
@@ -32,6 +32,7 @@ class SEC5TESTINGGROUNDS_API AGuardAIController : public AAIController
 public:
 	AGuardAIController();
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
 	// Perceprion
@@ -53,6 +54,7 @@ private:
 	// Behavior
 	void ShootAtEnemy();
 	bool NoMoreMovement();
+	class AUnitedCharacter* ControlledCharacter;
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	AActor* DetectedEnemy;

@@ -5,6 +5,7 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/UnitedCharacter.h"
 
 AGuardAIController::AGuardAIController()
 {
@@ -40,6 +41,14 @@ void AGuardAIController::BeginPlay()
 	// Setup EQS Request
 	if (!ensure(EQSQuery)) return;
 	FindNextPatrolPointEQSRequest = FEnvQueryRequest(EQSQuery, this);
+}
+
+void AGuardAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	// Initialize usefull variables
+	ControlledCharacter = Cast<AUnitedCharacter>(InPawn);
 }
 
 void AGuardAIController::Tick(float DeltaTime)
@@ -78,10 +87,12 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 	if (Stimulus.WasSuccessfullySensed()) {
 		DetectedEnemy = Actor;
 		SetFocus(DetectedEnemy);
+		if (ensure(ControlledCharacter)) ControlledCharacter->MustAim = true;
 	}
 	if (!Stimulus.WasSuccessfullySensed()) {
 		DetectedEnemy = nullptr;
 		ClearFocus(EAIFocusPriority::Gameplay);
+		if (ensure(ControlledCharacter)) ControlledCharacter->MustAim = false;
 	}
 }
 
