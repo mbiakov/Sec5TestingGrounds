@@ -58,16 +58,21 @@ void AGuardAIController::Tick(float DeltaTime)
 	// State Transitions
 	// For the following State Transition, if the Enemy is detected, we must enter the state EnemyDetected independently of the actual state.
 	// We still must verify that we are not already in the State EnemyDetected, else the transition actions will be always executed.
-	if (ActualGuardBehavior != EGuardBahaviorState::EnemyDetected && DetectedEnemy) {
+	if (ActualGuardBehavior != EGuardBahaviorState::EnemyDetected && EnemyDetected) {
 		Timer.ClearTimers(); // Clear Timers from other States
 		MustShootABurst = true; // Must be set to true if we want the AI shoot at us as soon as he sees us
 		ActualGuardBehavior = EGuardBahaviorState::EnemyDetected;
 	}
-	if (ActualGuardBehavior == EGuardBahaviorState::EnemyDetected && !DetectedEnemy) {
-		StopMovement(); // Stop moving towards the Enemy
+	if (ActualGuardBehavior == EGuardBahaviorState::EnemyDetected && !EnemyDetected) {
+		// Move to the last know location.
+		// Since we move to a fixe location the movement can be done in the transition for optimization.
+		MoveToLocation(DetectedEnemy->GetActorLocation());
 		ShootsInBurst = 0; // Reinitialize shoot variable
 		ActualShootInBurst = 0; // Reinitialize shoot variable
 		Timer.ClearTimers(); // Clear shoot Timers
+		ActualGuardBehavior = EGuardBahaviorState::Suspicious;
+	}
+	if (ActualGuardBehavior == EGuardBahaviorState::Suspicious && NoMoreMovement()) {
 		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
 	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint && NoMoreMovement()) {
@@ -95,11 +100,12 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 		DetectedEnemy = Actor;
 		SetFocus(DetectedEnemy);
 		if (ensure(ControlledCharacter)) ControlledCharacter->MustAim = true;
+		EnemyDetected = true;
 	}
 	if (!Stimulus.WasSuccessfullySensed()) {
-		DetectedEnemy = nullptr;
 		ClearFocus(EAIFocusPriority::Gameplay);
 		if (ensure(ControlledCharacter)) ControlledCharacter->MustAim = false;
+		EnemyDetected = false;
 	}
 }
 

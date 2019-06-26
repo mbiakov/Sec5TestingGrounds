@@ -17,8 +17,9 @@ UENUM()
 enum EGuardBahaviorState
 {
 	EnemyDetected,
-	MovingToTheNextPatrolPoint,
+	Suspicious,
 	WaitingOnPatrolPoint,
+	MovingToTheNextPatrolPoint,
 };
 
 /**
@@ -69,6 +70,7 @@ private:
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	AActor* DetectedEnemy;
+	bool EnemyDetected = false; // For EnemyDetected State Transitions
 	/** Shooting */
 	void ShootAtEnemy();
 	bool MustShootABurst = false;
