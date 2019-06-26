@@ -47,6 +47,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shooting Configuration")
 	class UAnimMontage* ThirdPersonFireAnimation;
 
+	/** Animation */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
+	bool MustAim;
+
 private:
 	void AttachGun();
 };
