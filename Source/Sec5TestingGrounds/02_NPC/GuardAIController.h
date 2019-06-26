@@ -16,7 +16,6 @@
 UENUM()
 enum EGuardBahaviorState
 {
-	NoOngoingAction,
 	MovingToTheNextPatrolPoint,
 	WaitingOnPatrolPoint,
 };
@@ -53,9 +52,9 @@ private:
 	// Behavior
 	bool NoMoreMovement();
 	FTimerUtility Timer = FTimerUtility();
-	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
+	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	// EQS (for Behavior)
-	void MoveToNextPatrolPoint(TSharedPtr<FEnvQueryResult> Result);
+	void MoveToNextPatrolPointOnEQSExecuted(TSharedPtr<FEnvQueryResult> Result);
 	FEnvQueryRequest FindNextPatrolPointEQSRequest;
 	FVector NextPatrolPoint = FVector(0);
 

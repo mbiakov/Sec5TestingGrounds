@@ -44,25 +44,14 @@ void AGuardAIController::BeginPlay()
 void AGuardAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (ActualGuardBehavior == EGuardBahaviorState::NoOngoingAction) {
-		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPoint);
+
+	// State Transitions
+	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint && NoMoreMovement()) {
+		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
+	}
+	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint && Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
+		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
-		return;
-	}
-
-	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint) {
-		if (NoMoreMovement()) {
-			ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
-			return;
-		}
-	}
-
-	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint) {
-		if (Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
-			ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
-			return;
-		}
 	}
 }
 
@@ -79,7 +68,7 @@ bool AGuardAIController::NoMoreMovement()
 	return Timer.CheckAfterWaitTime(this, GetPawn()->GetVelocity().Size() == 0, 1, "WaitForMovementStart");
 }
 
-void AGuardAIController::MoveToNextPatrolPoint(TSharedPtr<FEnvQueryResult> Result)
+void AGuardAIController::MoveToNextPatrolPointOnEQSExecuted(TSharedPtr<FEnvQueryResult> Result)
 {
 	NextPatrolPoint = Result->GetItemAsLocation(0);
 	MoveToLocation(NextPatrolPoint, 10);
