@@ -47,7 +47,7 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	// Initialize usefull variables
+	// Initialize
 	ControlledCharacter = Cast<AUnitedCharacter>(InPawn);
 }
 
@@ -56,8 +56,9 @@ void AGuardAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// State Transitions
-	if (DetectedEnemy) {
-		MoveToActor(DetectedEnemy, 300);
+	// For the following State Transition, if the Enemy is detected, we must enter the state EnemyDetected independently of the actual state.
+	// We still must verify that we are not already in the State EnemyDetected, else the transition actions will be always executed.
+	if (ActualGuardBehavior != EGuardBahaviorState::EnemyDetected && DetectedEnemy) {
 		Timer.ClearTimers(); // Since we enter EnemyDetected state globally, there may remain some Timers. We need to clear them.
 		ActualGuardBehavior = EGuardBahaviorState::EnemyDetected;
 	}
@@ -69,12 +70,14 @@ void AGuardAIController::Tick(float DeltaTime)
 		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
 	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint && Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
+		// Since we move to a fixe location the movement can be done in the transition for optimization.
 		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
 	}
 
 	// State Actions
 	if (ActualGuardBehavior == EGuardBahaviorState::EnemyDetected) {
+		MoveToActor(DetectedEnemy, 300);
 		ShootAtEnemy();
 	}
 }
@@ -98,7 +101,10 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 
 void AGuardAIController::ShootAtEnemy()
 {
-	UE_LOG(LogTemp, Warning, TEXT("%f: Shooting Enemy"), GetWorld()->GetTimeSeconds());
+	if (Timer.TimeHasPassed(this, 2, "ShootFrequency")) {
+		UE_LOG(LogTemp, Warning, TEXT("%f: Shooting"), GetWorld()->GetTimeSeconds());
+		ControlledCharacter->PullTrigger();
+	}
 }
 
 bool AGuardAIController::NoMoreMovement()
