@@ -35,35 +35,47 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
-	// Perceprion
+	/** Perceprion */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Perception")
 	class UAIPerceptionComponent* AIPerceptionComponent;
 	class UAISenseConfig_Sight* Sight;
 	class UAISenseConfig_Hearing* Hearing;
 
-	// Behavior
+	/** Behavior */
+	/** Wait Time */
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
 	float MinPatrolPointWaitTime = 2;
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
 	float MaxPatrolPointWaitTime = 4;
-	// EQS (for Behavior)
+	/** Shooting */
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	float MinTimeBetweenTwoBursts = 1;
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	float MaxTimeBetweenTwoBursts = 4;
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	int MinShootsInBurst = 2;
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	int MaxShootsInBurst = 5;
+	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
+	float ShootFrequencyInBurst = 0.15;
+	/** EQS (for Behavior) */
 	UPROPERTY(EditDefaultsOnly, Category = "EQS")
 	class UEnvQuery* EQSQuery;
 
 private:
-	// Behavior
+	/** Behavior */
 	void ShootAtEnemy();
 	bool NoMoreMovement();
 	class AUnitedCharacter* ControlledCharacter;
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	AActor* DetectedEnemy;
-	// EQS (for Behavior)
+	/** EQS (for Behavior) */
 	void MoveToNextPatrolPointOnEQSExecuted(TSharedPtr<FEnvQueryResult> Result);
 	FEnvQueryRequest FindNextPatrolPointEQSRequest;
 	FVector NextPatrolPoint = FVector(0);
 
-	// Perceprion
+	/** Perceprion */
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 };
