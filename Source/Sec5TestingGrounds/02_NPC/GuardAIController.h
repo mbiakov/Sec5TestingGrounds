@@ -64,12 +64,16 @@ public:
 
 private:
 	/** Behavior */
-	void ShootAtEnemy();
 	bool NoMoreMovement();
 	class AUnitedCharacter* ControlledCharacter;
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	AActor* DetectedEnemy;
+	/** Shooting */
+	void ShootAtEnemy();
+	bool MustShootABurst = false;
+	int32 ShootsInBurst = 0;
+	int32 ActualShootInBurst = 0;
 	/** EQS (for Behavior) */
 	void MoveToNextPatrolPointOnEQSExecuted(TSharedPtr<FEnvQueryResult> Result);
 	FEnvQueryRequest FindNextPatrolPointEQSRequest;
