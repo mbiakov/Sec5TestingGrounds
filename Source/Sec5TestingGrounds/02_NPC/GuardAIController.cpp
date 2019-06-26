@@ -45,14 +45,13 @@ void AGuardAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	if (ActualGuardBehavior == EGuardBahaviorState::NoOngoingAction) {
-		MovementStartedAt = GetWorld()->GetTimeSeconds();
 		FindNextWaypointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextWaypoint);
 		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextWaypoint;
 		return;
 	}
 
 	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextWaypoint) {
-		if (GetPawn()->GetVelocity().Size() == 0 && GetWorld()->GetTimeSeconds() - MovementStartedAt >= 1) { // Need to wait a second before checking Velocity, because at the beginning of the movement the Velocity is 0
+		if (NoMoreMovement()) {
 			ActualGuardBehavior = EGuardBahaviorState::Waiting;
 			return;
 		}
@@ -69,6 +68,14 @@ void AGuardAIController::Tick(float DeltaTime)
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Actor: %s ||| Stimulus: %i"), *Actor->GetName(), Stimulus.WasSuccessfullySensed());
+}
+
+bool AGuardAIController::NoMoreMovement()
+{
+	// We need to wait before checking for Velocity, because at the beginning of the movement the Velocity is 0.
+	// If we don't wait before checking, the Guard State will go to Waiting directly at the Begging of the Movement
+	// Wait Time count will start, while moving. When the Guard will arrive to destination, he will not wait anymore because the wait time has passed.
+	return Timer.CheckAfterWaitTime(this, GetPawn()->GetVelocity().Size() == 0, 1, "WaitForMovementStart");
 }
 
 void AGuardAIController::MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result)

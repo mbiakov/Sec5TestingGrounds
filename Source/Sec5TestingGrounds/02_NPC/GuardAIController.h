@@ -40,28 +40,26 @@ public:
 	class UAISenseConfig_Sight* Sight;
 	class UAISenseConfig_Hearing* Hearing;
 
-	// EQS
-	UPROPERTY(EditDefaultsOnly, Category = "EQS")
-	class UEnvQuery* EQSQuery;
-
 	// Behavior
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
 	float MinWaitTime = 2;
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
 	float MaxWaitTime = 4;
+	// EQS (for Behavior)
+	UPROPERTY(EditDefaultsOnly, Category = "EQS")
+	class UEnvQuery* EQSQuery;
 
 private:
 	// Behavior
+	bool NoMoreMovement();
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
-	float MovementStartedAt = 0;
+	// EQS (for Behavior)
+	void MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result);
+	FEnvQueryRequest FindNextWaypointEQSRequest;
+	FVector NextWaypoint = FVector(0);
 
 	// Perceprion
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
-
-	// EQS
-	void MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result);
-	FEnvQueryRequest FindNextWaypointEQSRequest;
-	FVector NextWaypoint = FVector(0);
 };
