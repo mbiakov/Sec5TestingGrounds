@@ -36,8 +36,9 @@ void AGuardAIController::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Setup EQS Request
 	if (!ensure(EQSQuery)) return;
-	FindNextWaypointEQSRequest = FEnvQueryRequest(EQSQuery, this);
+	FindNextPatrolPointEQSRequest = FEnvQueryRequest(EQSQuery, this);
 }
 
 void AGuardAIController::Tick(float DeltaTime)
@@ -45,20 +46,20 @@ void AGuardAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	if (ActualGuardBehavior == EGuardBahaviorState::NoOngoingAction) {
-		FindNextWaypointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextWaypoint);
-		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextWaypoint;
+		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPoint);
+		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
 		return;
 	}
 
-	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextWaypoint) {
+	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint) {
 		if (NoMoreMovement()) {
-			ActualGuardBehavior = EGuardBahaviorState::Waiting;
+			ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 			return;
 		}
 	}
 
-	if (ActualGuardBehavior == EGuardBahaviorState::Waiting) {
-		if (Timer.TimeHasPassed(this, MinWaitTime, MaxWaitTime, "WaitOnPatrolPoint")) {
+	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint) {
+		if (Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
 			ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
 			return;
 		}
@@ -78,8 +79,8 @@ bool AGuardAIController::NoMoreMovement()
 	return Timer.CheckAfterWaitTime(this, GetPawn()->GetVelocity().Size() == 0, 1, "WaitForMovementStart");
 }
 
-void AGuardAIController::MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result)
+void AGuardAIController::MoveToNextPatrolPoint(TSharedPtr<FEnvQueryResult> Result)
 {
-	NextWaypoint = Result->GetItemAsLocation(0);
-	MoveToLocation(NextWaypoint, 10);
+	NextPatrolPoint = Result->GetItemAsLocation(0);
+	MoveToLocation(NextPatrolPoint, 10);
 }

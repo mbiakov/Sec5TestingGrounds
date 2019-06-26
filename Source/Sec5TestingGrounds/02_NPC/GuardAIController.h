@@ -17,8 +17,8 @@ UENUM()
 enum EGuardBahaviorState
 {
 	NoOngoingAction,
-	MovingToTheNextWaypoint,
-	Waiting,
+	MovingToTheNextPatrolPoint,
+	WaitingOnPatrolPoint,
 };
 
 /**
@@ -42,9 +42,9 @@ public:
 
 	// Behavior
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
-	float MinWaitTime = 2;
+	float MinPatrolPointWaitTime = 2;
 	UPROPERTY(EditDefaultsOnly, Category = "Behavior")
-	float MaxWaitTime = 4;
+	float MaxPatrolPointWaitTime = 4;
 	// EQS (for Behavior)
 	UPROPERTY(EditDefaultsOnly, Category = "EQS")
 	class UEnvQuery* EQSQuery;
@@ -55,9 +55,9 @@ private:
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
 	// EQS (for Behavior)
-	void MoveToNextWaypoint(TSharedPtr<FEnvQueryResult> Result);
-	FEnvQueryRequest FindNextWaypointEQSRequest;
-	FVector NextWaypoint = FVector(0);
+	void MoveToNextPatrolPoint(TSharedPtr<FEnvQueryResult> Result);
+	FEnvQueryRequest FindNextPatrolPointEQSRequest;
+	FVector NextPatrolPoint = FVector(0);
 
 	// Perceprion
 	UFUNCTION()
