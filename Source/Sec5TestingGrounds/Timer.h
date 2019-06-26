@@ -34,6 +34,7 @@ struct FTimerUtility
 
 public:
 	bool TimeHasPassed(UObject* WorldContextObject, float TimeToWait, FName UniqueTimerName);
+	bool TimeHasPassed(UObject* WorldContextObject, float MinTimeToWait, float MaxTimeToWait, FName UniqueTimerName);
 
 private:
 	TMap<FName, UTimer*> TimerMap;

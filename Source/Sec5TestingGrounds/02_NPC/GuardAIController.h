@@ -5,6 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
+#include "Timer.h"
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "GuardAIController.generated.h"
@@ -51,10 +52,9 @@ public:
 
 private:
 	// Behavior
+	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
 	float MovementStartedAt = 0;
-	float ActualWaitTime = 0;
-	float WaitStartedAt = 0;
 
 	// Perceprion
 	UFUNCTION()

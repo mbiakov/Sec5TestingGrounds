@@ -53,17 +53,13 @@ void AGuardAIController::Tick(float DeltaTime)
 
 	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextWaypoint) {
 		if (GetPawn()->GetVelocity().Size() == 0 && GetWorld()->GetTimeSeconds() - MovementStartedAt >= 1) { // Need to wait a second before checking Velocity, because at the beginning of the movement the Velocity is 0
-			WaitStartedAt = GetWorld()->GetTimeSeconds();
-			ActualWaitTime = FMath::FRandRange(MinWaitTime, MaxWaitTime);
 			ActualGuardBehavior = EGuardBahaviorState::Waiting;
 			return;
 		}
 	}
 
 	if (ActualGuardBehavior == EGuardBahaviorState::Waiting) {
-		if (GetWorld()->GetTimeSeconds() - WaitStartedAt >= ActualWaitTime) {
-			WaitStartedAt = 0;
-			ActualWaitTime = 0;
+		if (Timer.TimeHasPassed(this, MinWaitTime, MaxWaitTime, "WaitOnPatrolPoint")) {
 			ActualGuardBehavior = EGuardBahaviorState::NoOngoingAction;
 			return;
 		}

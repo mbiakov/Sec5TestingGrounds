@@ -39,3 +39,9 @@ bool FTimerUtility::TimeHasPassed(UObject* WorldContextObject, float TimeToWait,
 	// Timer->TimeHasPassed returned false so the Time has not passed
 	return false;
 }
+
+bool FTimerUtility::TimeHasPassed(UObject* WorldContextObject, float MinTimeToWait, float MaxTimeToWait, FName UniqueTimerName)
+{
+	float TimeToWait = FMath::FRandRange(MinTimeToWait, MaxTimeToWait);
+	return TimeHasPassed(WorldContextObject, TimeToWait, UniqueTimerName);
+}
