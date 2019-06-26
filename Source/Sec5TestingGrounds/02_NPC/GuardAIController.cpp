@@ -85,7 +85,7 @@ void AGuardAIController::PerformStateTransitions()
 	}
 	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint && Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
 		// Since we move to a fixe location the movement can be done in the transition for optimization.
-		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
+		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest5Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
 	}
 }
