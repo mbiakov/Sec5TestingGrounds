@@ -4,6 +4,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
+#include "Kismet/GameplayStatics.h"
 
 AGuardAIController::AGuardAIController()
 {
@@ -46,6 +47,15 @@ void AGuardAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// State Transitions
+	if (DetectedEnemy) {
+		MoveToActor(DetectedEnemy, 300);
+		Timer.ClearTimers(); // Since we enter EnemyDetected state globally, there may remain some Timers. We need to clear them.
+		ActualGuardBehavior = EGuardBahaviorState::EnemyDetected;
+	}
+	if (ActualGuardBehavior == EGuardBahaviorState::EnemyDetected && !DetectedEnemy) {
+		StopMovement();
+		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
+	}
 	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint && NoMoreMovement()) {
 		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
@@ -53,11 +63,31 @@ void AGuardAIController::Tick(float DeltaTime)
 		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest25Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
 	}
+
+	// State Actions
+	if (ActualGuardBehavior == EGuardBahaviorState::EnemyDetected) {
+		ShootAtEnemy();
+	}
 }
 
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Actor: %s ||| Stimulus: %i"), *Actor->GetName(), Stimulus.WasSuccessfullySensed());
+	if (Actor != UGameplayStatics::GetPlayerPawn(this, 0)) return;
+
+	// From here we know that we detected the player
+	if (Stimulus.WasSuccessfullySensed()) {
+		DetectedEnemy = Actor;
+		SetFocus(DetectedEnemy);
+	}
+	if (!Stimulus.WasSuccessfullySensed()) {
+		DetectedEnemy = nullptr;
+		ClearFocus(EAIFocusPriority::Gameplay);
+	}
+}
+
+void AGuardAIController::ShootAtEnemy()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%f: Shooting Enemy"), GetWorld()->GetTimeSeconds());
 }
 
 bool AGuardAIController::NoMoreMovement()

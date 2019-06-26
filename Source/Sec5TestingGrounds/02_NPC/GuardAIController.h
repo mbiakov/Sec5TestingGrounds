@@ -16,6 +16,7 @@
 UENUM()
 enum EGuardBahaviorState
 {
+	EnemyDetected,
 	MovingToTheNextPatrolPoint,
 	WaitingOnPatrolPoint,
 };
@@ -50,9 +51,11 @@ public:
 
 private:
 	// Behavior
+	void ShootAtEnemy();
 	bool NoMoreMovement();
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
+	AActor* DetectedEnemy;
 	// EQS (for Behavior)
 	void MoveToNextPatrolPointOnEQSExecuted(TSharedPtr<FEnvQueryResult> Result);
 	FEnvQueryRequest FindNextPatrolPointEQSRequest;

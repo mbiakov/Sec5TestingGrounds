@@ -67,5 +67,9 @@ bool FTimerUtility::CheckAfterWaitTime(UObject* WorldContextObject, bool Conditi
 
 	// Timer->TimeHasPassed returned false so the Time has not passed
 	return false;
-	return false;
+}
+
+void FTimerUtility::ClearTimers()
+{
+	TimerMap.Empty();
 }
