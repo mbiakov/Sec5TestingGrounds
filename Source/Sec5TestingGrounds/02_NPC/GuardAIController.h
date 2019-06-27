@@ -77,6 +77,8 @@ private:
 	bool EnemyDetected = false; // For EnemyDetected State Transitions
 	/** Shooting */
 	void ShootAtEnemy();
+	bool FindGun();
+	class AGun* Gun;
 	bool MustShootABurst = false;
 	int32 ShootsInBurst = 0;
 	int32 ActualShootInBurst = 0;
