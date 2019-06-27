@@ -85,7 +85,7 @@ void AGuardAIController::PerformStateTransitions()
 		if (NoMoreMovement()) ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
 	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint) {
-		if (PatrolPointWaitTime.TimeHasPassed(MinPatrolPointWaitTime, MaxPatrolPointWaitTime)) {
+		if (PatrolPointWaitTime.HasPassed()) {
 			// Since we move to a fixe location the movement can be done in the transition for optimization.
 			FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest5Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 			ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
@@ -122,14 +122,14 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 void AGuardAIController::ShootAtEnemy()
 {
 	if (!MustShootABurst) {
-		if (BetweenBurstsWaitTime.TimeHasPassed(MinTimeBetweenTwoBursts, MaxTimeBetweenTwoBursts)) MustShootABurst = true;
+		if (BetweenBurstsWaitTime.HasPassed()) MustShootABurst = true;
 	}
 
 	if (MustShootABurst) {
 		// Initialization for each burst
 		if (ShootsInBurst == 0) ShootsInBurst = FMath::RandRange(MinShootsInBurst, MaxShootsInBurst);
 
-		if (BetweenShootsWaitTime.TimeHasPassed(ShootFrequencyInBurst)) {
+		if (BetweenShootsWaitTime.HasPassed()) {
 			if (!FindGun()) return;
 			Gun->OnFire();
 
@@ -148,7 +148,7 @@ bool AGuardAIController::NoMoreMovement()
 	// We need to wait before checking for Velocity, because at the beginning of the movement the Velocity is 0.
 	// If we don't wait before checking, the Guard State will go to Waiting directly at the Begging of the Movement.
 	// Wait Time count will start, while moving. When the Guard will arrive to destination, he will not wait anymore because the wait time has passed.
-	return NoMoreMovementWaitTime.CheckAfterWaitTime(GetPawn()->GetVelocity().Size() == 0, 1);
+	return NoMoreMovementWaitTime.CheckAfterWaitTime(GetPawn()->GetVelocity().Size() == 0);
 }
 
 bool AGuardAIController::FindGun()

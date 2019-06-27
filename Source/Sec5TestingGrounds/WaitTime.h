@@ -15,16 +15,19 @@ struct FWaitTime
 
 public:
 	FWaitTime();
-	FWaitTime(UObject* WorldContextObjectToSet);
+	FWaitTime(UObject* WorldContextObjectToSet, float TimeToWaitToSet);
+	FWaitTime(UObject* WorldContextObjectToSet, float MinTimeToWaitToSet, float MaxTimeToWaitToSet);
 
-	bool TimeHasPassed(float TimeToWaitToSet);
-	bool TimeHasPassed(float MinTimeToWait, float MaxTimeToWait);
-	bool CheckAfterWaitTime(bool ConditionToCheck, float TimeToWaitToSet);
+	bool HasPassed();
+	bool CheckAfterWaitTime(bool ConditionToCheck);
 	void Clear();
 
 private:
 	UObject* WorldContextObject;
 	bool InUse;
+	bool WaitTimeIsRandom;
 	float TimeToWait;
 	float WaitStartedAt;
+	float MinTimeToWait;
+	float MaxTimeToWait;
 };

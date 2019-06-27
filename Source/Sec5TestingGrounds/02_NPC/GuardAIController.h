@@ -78,10 +78,10 @@ private:
 	AActor* DetectedEnemy;
 	bool EnemyDetected = false; // For EnemyDetected State Transitions
 	/** Timers */
-	FWaitTime PatrolPointWaitTime = FWaitTime(this);
-	FWaitTime BetweenBurstsWaitTime = FWaitTime(this);
-	FWaitTime BetweenShootsWaitTime = FWaitTime(this);
-	FWaitTime NoMoreMovementWaitTime = FWaitTime(this);
+	FWaitTime PatrolPointWaitTime = FWaitTime(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime);
+	FWaitTime BetweenBurstsWaitTime = FWaitTime(this, MinTimeBetweenTwoBursts, MaxTimeBetweenTwoBursts);
+	FWaitTime BetweenShootsWaitTime = FWaitTime(this, ShootFrequencyInBurst);
+	FWaitTime NoMoreMovementWaitTime = FWaitTime(this, 1);
 	/** Shooting */
 	void ShootAtEnemy();
 	bool FindGun();
