@@ -40,4 +40,6 @@ public:
 
 private:
 	TMap<FName, UTimer*> TimerMap;
+	bool SetNewTimer(UObject* WorldContextObject, float TimeToWait, FName UniqueTimerName);
+	bool CheckAndRemoveTimerIfTimeHasPassed(UObject* WorldContextObject, UTimer* Timer, FName UniqueTimerName);
 };

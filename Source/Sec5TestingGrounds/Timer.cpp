@@ -22,54 +22,46 @@ bool UTimer::TimeHasPassed(UObject* WorldContextObject)
 bool FTimerUtility::TimeHasPassed(UObject* WorldContextObject, float TimeToWait, FName UniqueTimerName)
 {
 	UTimer** TimerPtrPtr = TimerMap.Find(UniqueTimerName);
-
-	if (!TimerPtrPtr) {
-		UTimer* TimerToAdd = NewObject<UTimer>();
-		TimerToAdd->InitializeTimer(WorldContextObject, TimeToWait);
-		TimerMap.Add(UniqueTimerName, TimerToAdd);
-		return false;
-	}
-
-	// The Timer was already set, so we need to verify if the time has passed
-	if ((*TimerPtrPtr)->TimeHasPassed(WorldContextObject)) {
-		TimerMap.Remove(UniqueTimerName);
-		return true;
-	}
-	
-	// Timer->TimeHasPassed returned false so the Time has not passed
-	return false;
+	if (!TimerPtrPtr) return SetNewTimer(WorldContextObject, TimeToWait, UniqueTimerName);
+	return CheckAndRemoveTimerIfTimeHasPassed(WorldContextObject, (*TimerPtrPtr), UniqueTimerName);
 }
 
 bool FTimerUtility::TimeHasPassed(UObject* WorldContextObject, float MinTimeToWait, float MaxTimeToWait, FName UniqueTimerName)
 {
-	float TimeToWait = FMath::FRandRange(MinTimeToWait, MaxTimeToWait);
-	return TimeHasPassed(WorldContextObject, TimeToWait, UniqueTimerName);
+	UTimer** TimerPtrPtr = TimerMap.Find(UniqueTimerName);
+	if (!TimerPtrPtr) return SetNewTimer(WorldContextObject, FMath::FRandRange(MinTimeToWait, MaxTimeToWait), UniqueTimerName);
+	return CheckAndRemoveTimerIfTimeHasPassed(WorldContextObject, (*TimerPtrPtr), UniqueTimerName);
 }
 
 bool FTimerUtility::CheckAfterWaitTime(UObject* WorldContextObject, bool ConditionToCheck, float TimeToWait, FName UniqueTimerName)
 {
 	UTimer** TimerPtrPtr = TimerMap.Find(UniqueTimerName);
+	if (!TimerPtrPtr) return SetNewTimer(WorldContextObject, TimeToWait, UniqueTimerName);
+	// Verify the confition
+	if (!ConditionToCheck) return false;
+	return CheckAndRemoveTimerIfTimeHasPassed(WorldContextObject, (*TimerPtrPtr), UniqueTimerName);
+}
 
-	if (!TimerPtrPtr) {
-		UTimer* TimerToAdd = NewObject<UTimer>();
-		TimerToAdd->InitializeTimer(WorldContextObject, TimeToWait);
-		TimerMap.Add(UniqueTimerName, TimerToAdd);
-		return false;
-	}
+void FTimerUtility::ClearTimers()
+{
+	TimerMap.Empty();
+}
 
-	// The Timer was already set, so we need to verify if the time has passed
-	if ((*TimerPtrPtr)->TimeHasPassed(WorldContextObject)) {
-		if (!ConditionToCheck) return false; // The time has passed but the condition is false. We keep the Timer to be able to know that the time has passed
-		// The time has passed and condition is true, the timer can be deleted
+bool FTimerUtility::SetNewTimer(UObject* WorldContextObject, float TimeToWait, FName UniqueTimerName)
+{
+	UTimer* TimerToAdd = NewObject<UTimer>();
+	TimerToAdd->InitializeTimer(WorldContextObject, TimeToWait);
+	TimerMap.Add(UniqueTimerName, TimerToAdd);
+	return false;
+}
+
+bool FTimerUtility::CheckAndRemoveTimerIfTimeHasPassed(UObject* WorldContextObject, UTimer* Timer, FName UniqueTimerName)
+{
+	if (Timer->TimeHasPassed(WorldContextObject)) {
 		TimerMap.Remove(UniqueTimerName);
 		return true;
 	}
 
 	// Timer->TimeHasPassed returned false so the Time has not passed
 	return false;
-}
-
-void FTimerUtility::ClearTimers()
-{
-	TimerMap.Empty();
 }
