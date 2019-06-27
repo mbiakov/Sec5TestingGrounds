@@ -74,16 +74,20 @@ void AGuardAIController::PerformStateTransitions()
 		Timer.ClearTimers(); // Clear shoot Timers
 		ActualGuardBehavior = EGuardBahaviorState::Suspicious;
 	}
-	if (ActualGuardBehavior == EGuardBahaviorState::Suspicious && NoMoreMovement()) {
-		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
+	if (ActualGuardBehavior == EGuardBahaviorState::Suspicious) {
+		// There is a Timer in NoMoreMovement() so we want to be sure the condition NoMoreMovement() is not evaluated if the state is not Suspicious
+		if (NoMoreMovement()) ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
-	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint && NoMoreMovement()) {
-		ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
+	if (ActualGuardBehavior == EGuardBahaviorState::MovingToTheNextPatrolPoint) {
+		// There is a Timer in NoMoreMovement() so we want to be sure the condition NoMoreMovement() is not evaluated if the state is not Suspicious
+		if (NoMoreMovement()) ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
-	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint && Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
-		// Since we move to a fixe location the movement can be done in the transition for optimization.
-		FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest5Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
-		ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
+	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint) {
+		if (Timer.TimeHasPassed(this, MinPatrolPointWaitTime, MaxPatrolPointWaitTime, "WaitOnPatrolPoint")) {
+			// Since we move to a fixe location the movement can be done in the transition for optimization.
+			FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest5Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
+			ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
+		}
 	}
 }
 
