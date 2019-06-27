@@ -1,16 +1,16 @@
 // MBI Copyrights
 
 
-#include "NewTimer.h"
+#include "WaitTime.h"
 #include "Engine/World.h"
 
-FNewTimer::FNewTimer()
+FWaitTime::FWaitTime()
 {
 	// Never use this constructor
 	ensure(false);
 }
 
-FNewTimer::FNewTimer(UObject* WorldContextObjectToSet)
+FWaitTime::FWaitTime(UObject* WorldContextObjectToSet)
 {
 	WorldContextObject = WorldContextObjectToSet;
 	InUse = false;
@@ -18,7 +18,7 @@ FNewTimer::FNewTimer(UObject* WorldContextObjectToSet)
 	WaitStartedAt = 0;
 }
 
-bool FNewTimer::TimeHasPassed(float TimeToWaitToSet)
+bool FWaitTime::TimeHasPassed(float TimeToWaitToSet)
 {
 	if (!InUse) { // Initialize Timer
 		TimeToWait = TimeToWaitToSet;
@@ -35,7 +35,7 @@ bool FNewTimer::TimeHasPassed(float TimeToWaitToSet)
 	return false;
 }
 
-bool FNewTimer::TimeHasPassed(float MinTimeToWait, float MaxTimeToWait)
+bool FWaitTime::TimeHasPassed(float MinTimeToWait, float MaxTimeToWait)
 {
 	if (!InUse) { // Initialize Timer
 		TimeToWait = FMath::FRandRange(MinTimeToWait, MaxTimeToWait);
@@ -52,7 +52,7 @@ bool FNewTimer::TimeHasPassed(float MinTimeToWait, float MaxTimeToWait)
 	return false;
 }
 
-bool FNewTimer::CheckAfterWaitTime(bool ConditionToCheck, float TimeToWaitToSet)
+bool FWaitTime::CheckAfterWaitTime(bool ConditionToCheck, float TimeToWaitToSet)
 {
 	if (!InUse) { // Initialize Timer
 		TimeToWait = TimeToWaitToSet;
@@ -64,7 +64,7 @@ bool FNewTimer::CheckAfterWaitTime(bool ConditionToCheck, float TimeToWaitToSet)
 
 	// Verify the condition
 	if (!ConditionToCheck) return false;
-	
+
 	if (WorldContextObject->GetWorld()->GetTimeSeconds() - WaitStartedAt >= TimeToWait) {
 		InUse = false; // To be able to use the Timer next time
 		return true;
@@ -72,7 +72,7 @@ bool FNewTimer::CheckAfterWaitTime(bool ConditionToCheck, float TimeToWaitToSet)
 	return false;
 }
 
-void FNewTimer::Clear()
+void FWaitTime::Clear()
 {
 	InUse = false;
 }

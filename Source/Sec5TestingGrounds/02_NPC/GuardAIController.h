@@ -5,7 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
-#include "NewTimer.h"
+#include "WaitTime.h"
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "GuardAIController.generated.h"
@@ -78,10 +78,10 @@ private:
 	AActor* DetectedEnemy;
 	bool EnemyDetected = false; // For EnemyDetected State Transitions
 	/** Timers */
-	FNewTimer WaitOnPatrolPointTimer = FNewTimer(this);
-	FNewTimer BurstTimer = FNewTimer(this);
-	FNewTimer ShootTimer = FNewTimer(this);
-	FNewTimer NoMoreMovementTimer = FNewTimer(this);
+	FWaitTime PatrolPointWaitTime = FWaitTime(this);
+	FWaitTime BetweenBurstsWaitTime = FWaitTime(this);
+	FWaitTime BetweenShootsWaitTime = FWaitTime(this);
+	FWaitTime NoMoreMovementWaitTime = FWaitTime(this);
 	/** Shooting */
 	void ShootAtEnemy();
 	bool FindGun();

@@ -61,8 +61,8 @@ void AGuardAIController::PerformStateTransitions()
 	// For the following State Transition, if the Enemy is detected, we must enter the state EnemyDetected independently of the actual state.
 	// We still must verify that we are not already in the State EnemyDetected, else the transition actions will be always executed.
 	if (ActualGuardBehavior != EGuardBahaviorState::EnemyDetected && EnemyDetected) {
-		WaitOnPatrolPointTimer.Clear(); // Clear Timers from other States
-		NoMoreMovementTimer.Clear(); // Clear Timers from other States
+		PatrolPointWaitTime.Clear(); // Clear Timers from other States
+		NoMoreMovementWaitTime.Clear(); // Clear Timers from other States
 		MustShootABurst = true; // Must be set to true if we want the AI shoot at us as soon as he sees us
 		ActualGuardBehavior = EGuardBahaviorState::EnemyDetected;
 	}
@@ -72,8 +72,8 @@ void AGuardAIController::PerformStateTransitions()
 		MoveToLocation(DetectedEnemy->GetActorLocation());
 		ShootsInBurst = 0; // Reinitialize shoot variable
 		ActualShootInBurst = 0; // Reinitialize shoot variable
-		ShootTimer.Clear(); // Clear shoot Timers
-		BurstTimer.Clear(); // Clear shoot Timers
+		BetweenShootsWaitTime.Clear(); // Clear shoot Timers
+		BetweenBurstsWaitTime.Clear(); // Clear shoot Timers
 		ActualGuardBehavior = EGuardBahaviorState::Suspicious;
 	}
 	if (ActualGuardBehavior == EGuardBahaviorState::Suspicious) {
@@ -85,7 +85,7 @@ void AGuardAIController::PerformStateTransitions()
 		if (NoMoreMovement()) ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	}
 	if (ActualGuardBehavior == EGuardBahaviorState::WaitingOnPatrolPoint) {
-		if (WaitOnPatrolPointTimer.TimeHasPassed(MinPatrolPointWaitTime, MaxPatrolPointWaitTime)) {
+		if (PatrolPointWaitTime.TimeHasPassed(MinPatrolPointWaitTime, MaxPatrolPointWaitTime)) {
 			// Since we move to a fixe location the movement can be done in the transition for optimization.
 			FindNextPatrolPointEQSRequest.Execute(EEnvQueryRunMode::RandomBest5Pct, this, &AGuardAIController::MoveToNextPatrolPointOnEQSExecuted);
 			ActualGuardBehavior = EGuardBahaviorState::MovingToTheNextPatrolPoint;
@@ -122,14 +122,14 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 void AGuardAIController::ShootAtEnemy()
 {
 	if (!MustShootABurst) {
-		if (BurstTimer.TimeHasPassed(MinTimeBetweenTwoBursts, MaxTimeBetweenTwoBursts)) MustShootABurst = true;
+		if (BetweenBurstsWaitTime.TimeHasPassed(MinTimeBetweenTwoBursts, MaxTimeBetweenTwoBursts)) MustShootABurst = true;
 	}
 
 	if (MustShootABurst) {
 		// Initialization for each burst
 		if (ShootsInBurst == 0) ShootsInBurst = FMath::RandRange(MinShootsInBurst, MaxShootsInBurst);
 
-		if (ShootTimer.TimeHasPassed(ShootFrequencyInBurst)) {
+		if (BetweenShootsWaitTime.TimeHasPassed(ShootFrequencyInBurst)) {
 			if (!FindGun()) return;
 			Gun->OnFire();
 
@@ -148,7 +148,7 @@ bool AGuardAIController::NoMoreMovement()
 	// We need to wait before checking for Velocity, because at the beginning of the movement the Velocity is 0.
 	// If we don't wait before checking, the Guard State will go to Waiting directly at the Begging of the Movement.
 	// Wait Time count will start, while moving. When the Guard will arrive to destination, he will not wait anymore because the wait time has passed.
-	return NoMoreMovementTimer.CheckAfterWaitTime(GetPawn()->GetVelocity().Size() == 0, 1);
+	return NoMoreMovementWaitTime.CheckAfterWaitTime(GetPawn()->GetVelocity().Size() == 0, 1);
 }
 
 bool AGuardAIController::FindGun()

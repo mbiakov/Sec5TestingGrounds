@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NewTimer.generated.h"
+#include "WaitTime.generated.h"
 
 /**
  * Comment
  */
 USTRUCT()
-struct FNewTimer
+struct FWaitTime
 {
 	GENERATED_USTRUCT_BODY()
 
 public:
-	FNewTimer();
-	FNewTimer(UObject* WorldContextObjectToSet);
+	FWaitTime();
+	FWaitTime(UObject* WorldContextObjectToSet);
 
 	bool TimeHasPassed(float TimeToWaitToSet);
 	bool TimeHasPassed(float MinTimeToWait, float MaxTimeToWait);
