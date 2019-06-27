@@ -36,6 +36,10 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
 
+	/** Animations */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
+	bool MustAim;
+
 	/** Perceprion */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Perception")
 	class UAIPerceptionComponent* AIPerceptionComponent;
@@ -70,7 +74,6 @@ private:
 
 	/** Behavior Utilities */
 	bool NoMoreMovement();
-	class AUnitedCharacter* ControlledCharacter;
 	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	AActor* DetectedEnemy;
