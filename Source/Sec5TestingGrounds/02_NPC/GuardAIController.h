@@ -5,7 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
-#include "Timer.h"
+#include "NewTimer.h"
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "GuardAIController.generated.h"
@@ -74,10 +74,14 @@ private:
 
 	/** Behavior Utilities */
 	bool NoMoreMovement();
-	FTimerUtility Timer = FTimerUtility();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
 	AActor* DetectedEnemy;
 	bool EnemyDetected = false; // For EnemyDetected State Transitions
+	/** Timers */
+	FNewTimer WaitOnPatrolPointTimer = FNewTimer(this);
+	FNewTimer BurstTimer = FNewTimer(this);
+	FNewTimer ShootTimer = FNewTimer(this);
+	FNewTimer NoMoreMovementTimer = FNewTimer(this);
 	/** Shooting */
 	void ShootAtEnemy();
 	bool FindGun();
