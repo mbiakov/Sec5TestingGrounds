@@ -5,7 +5,7 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Kismet/GameplayStatics.h"
-#include "03_Weapons/Gun.h"
+#include "Character/UnitedCharacter.h"
 
 AGuardAIController::AGuardAIController()
 {
@@ -46,6 +46,9 @@ void AGuardAIController::BeginPlay()
 void AGuardAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+
+	// Initialize
+	ControlledCharacter = Cast<AUnitedCharacter>(InPawn);
 }
 
 void AGuardAIController::Tick(float DeltaTime)
@@ -130,8 +133,7 @@ void AGuardAIController::ShootAtEnemy()
 		if (ShootsInBurst == 0) ShootsInBurst = FMath::RandRange(MinShootsInBurst, MaxShootsInBurst);
 
 		if (BetweenShootsWaitTime.HasPassed()) {
-			if (!FindGun()) return;
-			Gun->OnFire();
+			ControlledCharacter->PullTrigger();
 
 			ActualShootInBurst++;
 			if (ActualShootInBurst >= ShootsInBurst) { // Burst finished, reinitialize shooting variables
@@ -149,22 +151,6 @@ bool AGuardAIController::NoMoreMovement()
 	// If we don't wait before checking, the Guard State will go to Waiting directly at the Begging of the Movement.
 	// Wait Time count will start, while moving. When the Guard will arrive to destination, he will not wait anymore because the wait time has passed.
 	return NoMoreMovementWaitTime.CheckAfterWaitTime(GetPawn()->GetVelocity().Size() == 0);
-}
-
-bool AGuardAIController::FindGun()
-{
-	if (Gun) return true;
-
-	TArray<AActor*> PawnActors;
-	GetPawn()->GetAttachedActors(PawnActors);
-	for (AActor* PawnActor : PawnActors) {
-		if (Cast<AGun>(PawnActor)) {
-			Gun = Cast<AGun>(PawnActor);
-			return true;
-		}
-	}
-
-	return false;
 }
 
 void AGuardAIController::MoveToNextPatrolPointOnEQSExecuted(TSharedPtr<FEnvQueryResult> Result)

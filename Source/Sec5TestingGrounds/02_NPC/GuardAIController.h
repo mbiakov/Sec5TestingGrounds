@@ -75,6 +75,7 @@ private:
 	/** Behavior Utilities */
 	bool NoMoreMovement();
 	EGuardBahaviorState ActualGuardBehavior = EGuardBahaviorState::WaitingOnPatrolPoint;
+	class AUnitedCharacter* ControlledCharacter;
 	AActor* DetectedEnemy;
 	bool EnemyDetected = false; // For EnemyDetected State Transitions
 	/** Timers */
@@ -84,8 +85,6 @@ private:
 	FWaitTime NoMoreMovementWaitTime = FWaitTime(this, 1);
 	/** Shooting */
 	void ShootAtEnemy();
-	bool FindGun();
-	class AGun* Gun;
 	bool MustShootABurst = false;
 	int32 ShootsInBurst = 0;
 	int32 ActualShootInBurst = 0;
