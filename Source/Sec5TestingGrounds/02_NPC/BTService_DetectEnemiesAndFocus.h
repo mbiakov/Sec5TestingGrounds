@@ -15,24 +15,20 @@ class SEC5TESTINGGROUNDS_API UBTService_DetectEnemiesAndFocus : public UBTServic
 {
 	GENERATED_BODY()
 
-public:
+private:
 	UBTService_DetectEnemiesAndFocus();
-
-protected:
 	virtual void OnBecomeRelevant(class UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
+	UFUNCTION()
+	void OnTargetPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus);
+
+	UBlackboardComponent* Blackboard;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	struct FBlackboardKeySelector EnemyKey;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	struct FBlackboardKeySelector PersistentEnemyKey;
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	struct FBlackboardKeySelector EnemyWasSeenKey;
-
-private:
-	UFUNCTION()
-	void OnTargetPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus);
-
-	UBlackboardComponent* Blackboard;
 
 	class AAIController* AIController;
 	class AUnitedCharacter* AICharacter;
