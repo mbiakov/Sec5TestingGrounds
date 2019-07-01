@@ -12,6 +12,7 @@ UBTService_DetectEnemiesAndFocus::UBTService_DetectEnemiesAndFocus()
 {
 	bNotifyBecomeRelevant = true;
 	bNotifyTick = false;
+	ForceInstancing(true);
 }
 
 void UBTService_DetectEnemiesAndFocus::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
