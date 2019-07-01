@@ -9,6 +9,7 @@
 UBTTask_TrackAndShoot::UBTTask_TrackAndShoot()
 {
 	bNotifyTick = true;
+	ForceInstancing(true);
 }
 
 EBTNodeResult::Type UBTTask_TrackAndShoot::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
